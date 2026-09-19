@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Radar Clima Sul-Sul</title>
+<style>
+  :root {
+    --ink: #1b2430;
+    --ink-soft: #4a5568;
+    --paper: #eceef1;
+    --surface: #ffffff;
+    --surface-2: #f4f5f7;
+    --border: #d7dbe1;
+    --accent: #0f7a6c;
+    --link: #0d5d9e;
+
+    --cat-clima: #2e6f9e;
+    --cat-clima-bg: #e6eef5;
+    --cat-comunitaria: #1f8a5f;
+    --cat-comunitaria-bg: #e4f2ea;
+    --cat-informal: #a5691f;
+    --cat-informal-bg: #f5ecdd;
+    --cat-politico: #7a4fa0;
+    --cat-politico-bg: #efe6f5;
+
+    color-scheme: light dark;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #e7e9ed;
+      --ink-soft: #a3adba;
+      --paper: #12161c;
+      --surface: #1a2028;
+      --surface-2: #1f2630;
+      --border: #2c3542;
+      --accent: #3fb39f;
+      --link: #6cb2ec;
+
+      --cat-clima: #6fa8d8;
+      --cat-clima-bg: #1c2b3a;
+      --cat-comunitaria: #5ec996;
+      --cat-comunitaria-bg: #17301f;
+      --cat-informal: #d9a45f;
+      --cat-informal-bg: #33270f;
+      --cat-politico: #bd93da;
+      --cat-politico-bg: #2b1f38;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #e7e9ed;
+    --ink-soft: #a3adba;
+    --paper: #12161c;
+    --surface: #1a2028;
+    --surface-2: #1f2630;
+    --border: #2c3542;
+    --accent: #3fb39f;
+    --link: #6cb2ec;
+
+    --cat-clima: #6fa8d8;
+    --cat-clima-bg: #1c2b3a;
+    --cat-comunitaria: #5ec996;
+    --cat-comunitaria-bg: #17301f;
+    --cat-informal: #d9a45f;
+    --cat-informal-bg: #33270f;
+    --cat-politico: #bd93da;
+    --cat-politico-bg: #2b1f38;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    padding-inline: 16px;
+    padding-block: 20px 48px;
+  }
+
+  a { color: var(--link); }
+
+  .wrap { max-width: 960px; margin: 0 auto; }
+
+  header.top {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 5;
+    background: var(--paper);
+    padding-block: 10px 10px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h1 {
+    font-family: "Newsreader", Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    margin: 0 0 4px;
+    text-wrap: balance;
+  }
+
+  .subtitle {
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    max-width: 62ch;
+    margin: 0 0 10px;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    align-items: center;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+
+  .meta-row strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  .stats {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .stat-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  .stat-pill b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  nav.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .tab-btn {
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-soft);
+    padding: 7px 14px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+  }
+  .tab-btn[aria-selected="true"] {
+    background: var(--surface-2);
+    color: var(--ink);
+    border-bottom: 2px solid var(--accent);
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-bottom: 10px;
+  }
+
+  .filter-btn {
+    font: inherit;
+    font-size: 0.8rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-soft);
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .filter-btn[aria-pressed="true"] {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .filter-btn .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+
+  .tabpanel { padding-top: 8px; }
+
+  section.city { margin-top: 30px; }
+  section.city:first-child { margin-top: 10px; }
+
+  .city-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .city-head h2 {
+    font-family: "Newsreader", Georgia, serif;
+    font-size: 1.3rem;
+    margin: 0;
+  }
+  .city-count { font-size: 0.8rem; color: var(--ink-soft); }
+
+  .cards { display: flex; flex-direction: column; gap: 10px; }
+
+  .empty-note {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    font-style: italic;
+    padding: 10px 0;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--cat-color, var(--border));
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+
+  .card-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.76rem;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+
+  .cat-chip {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--cat-bg, var(--surface-2));
+    color: var(--cat-color, var(--ink-soft));
+    font-weight: 600;
+  }
+
+  .card-date { font-variant-numeric: tabular-nums; }
+
+  .card h3 { font-size: 1rem; margin: 0 0 6px; line-height: 1.35; }
+  .card h3 a { text-decoration: none; }
+  .card h3 a:hover { text-decoration: underline; }
+
+  .resumo { font-size: 0.9rem; line-height: 1.5; margin: 0; color: var(--ink); }
+
+  .flag {
+    margin-top: 8px;
+    font-size: 0.74rem;
+    color: var(--ink-soft);
+    border-top: 1px dashed var(--border);
+    padding-top: 6px;
+  }
+  .flag b { color: var(--ink); }
+
+  section.notas {
+    margin-top: 40px;
+    border-top: 3px double var(--ink);
+    padding-top: 16px;
+  }
+  section.notas h2 { font-family: "Newsreader", Georgia, serif; font-size: 1.25rem; margin: 0 0 12px; }
+  .nota {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .nota-date { font-size: 0.78rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; margin-bottom: 4px; }
+  .nota p { margin: 0; font-size: 0.92rem; line-height: 1.55; }
+
+  .sintese-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .sintese-card .city-head { margin-bottom: 8px; }
+  .sintese-card .updated { font-size: 0.76rem; color: var(--ink-soft); margin-bottom: 8px; }
+  .sintese-card p { font-size: 0.95rem; line-height: 1.6; margin: 0; }
+
+  .cloud-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 14px;
+    line-height: 1.4;
+  }
+  .cloud-word { color: var(--ink); white-space: nowrap; }
+
+  .atores-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 560px) { .atores-grid { grid-template-columns: 1fr; } }
+  .atores-col h4 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin: 0 0 8px;
+  }
+  .ator-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+  }
+  .ator-row .count { font-variant-numeric: tabular-nums; color: var(--ink-soft); flex-shrink: 0; }
+
+  footer.disclaimer {
+    margin-top: 40px;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    line-height: 1.5;
+  }
+
+  .loading, .db-error { font-size: 0.85rem; color: var(--ink-soft); padding: 20px 0; }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Radar Clima Sul-Sul</h1>
+    <p class="subtitle">Monitoramento semanal de notícias sobre governança climática e inovações comunitárias em assentamentos informais — Recife, Cidade do Cabo e Mumbai. Desk research para uso interno da pesquisa de doutorado.</p>
+    <div class="meta-row">
+      <span>Última atualização: <strong id="ultima-atualizacao">—</strong></span>
+      <span id="total-itens-row">—</span>
+    </div>
+    <div class="stats" id="stats-row"></div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Seções do painel"></nav>
+    <div class="filters" id="filters" role="group" aria-label="Filtrar por categoria"></div>
+  </header>
+
+  <div class="tabpanel" id="panel-noticias" role="tabpanel">
+    <div id="content"><div class="loading">Carregando itens do painel…</div></div>
+  </div>
+
+  <div class="tabpanel" id="panel-politico" role="tabpanel" hidden>
+    <div id="content-politico"><div class="loading">Carregando…</div></div>
+  </div>
+
+  <div class="tabpanel" id="panel-resumo" role="tabpanel" hidden>
+    <div id="content-resumo"><div class="loading">Carregando…</div></div>
+  </div>
+
+  <div class="tabpanel" id="panel-nuvem" role="tabpanel" hidden>
+    <div id="content-nuvem"><div class="loading">Carregando…</div></div>
+  </div>
+
+  <div class="tabpanel" id="panel-atores" role="tabpanel" hidden>
+    <div id="content-atores"><div class="loading">Carregando…</div></div>
+  </div>
+
+  <section class="notas">
+    <h2>Leitura transversal (notas semanais)</h2>
+    <div id="notas-list"><div class="loading">Carregando notas…</div></div>
+  </section>
+
+  <footer class="disclaimer">
+    Este painel é um radar de desk research para acompanhamento interno da pesquisa — não é uma fonte citável por si mesma. Itens incluídos apenas quando localizados com link real via busca; nenhum item é inventado para preencher categorias ou semanas. As abas "Clima político" e "Resumo" são sínteses escritas a partir dos itens coletados, revisadas a cada atualização; "Nuvem de palavras" e "Atores" são calculadas automaticamente a partir dos textos e das entidades marcadas em cada item.
+  </footer>
+</div>
+
+<script>
+(function () {
+  var CATS = [
+    { key: "Clima/Desastre", color: "var(--cat-clima)", bg: "var(--cat-clima-bg)" },
+    { key: "Solução comunitária", color: "var(--cat-comunitaria)", bg: "var(--cat-comunitaria-bg)" },
+    { key: "Informalidade/Remoção", color: "var(--cat-informal)", bg: "var(--cat-informal-bg)" },
+    { key: "Político-institucional", color: "var(--cat-politico)", bg: "var(--cat-politico-bg)" }
+  ];
+  var CITIES = [
+    { key: "recife", label: "Recife" },
+    { key: "cidade-do-cabo", label: "Cidade do Cabo" },
+    { key: "mumbai", label: "Mumbai" }
+  ];
+  var TABS = [
+    { key: "noticias", label: "Notícias" },
+    { key: "politico", label: "Clima político" },
+    { key: "resumo", label: "Resumo" },
+    { key: "nuvem", label: "Nuvem de palavras" },
+    { key: "atores", label: "Atores" }
+  ];
+
+  var STOPWORDS = {};
+  [
+    "a","o","as","os","de","da","do","das","dos","em","no","na","nos","nas","um","uma","uns","umas",
+    "e","é","ou","com","sem","por","para","que","se","sua","seu","suas","seus","ao","aos","à","às",
+    "mais","menos","muito","muitos","já","ainda","também","como","quando","onde","entre","sobre","após",
+    "foi","foram","ser","está","estão","tem","têm","há","this","that","the","and","of","to","in","for",
+    "on","with","at","by","as","is","are","was","were","after","over","its","it","a","an","from","new",
+    "amid","says","said","will","not","but","than","into","out","up","down","about","against",
+    "recife","mumbai","cabo","cidade","semana","semanas","dia","dias","cerca","segundo","não",
+    "são","será","serão","pelo","pela","pelos","pelas","este","esta","esse","essa","isso","seus","nesta",
+    "nesse","nessa","durante","ainda","apenas","cada","outros","outras","outro","outra","até","mil","milhões",
+    "milhão","r$","%","2026"
+  ].forEach(function (w) { STOPWORDS[w] = true; });
+
+  var activeFilter = "Todos";
+  var activeTab = "noticias";
+  var allItems = [];
+  var sintese = {};
+  var notas = [];
+
+  function catInfo(key) {
+    for (var i = 0; i < CATS.length; i++) if (CATS[i].key === key) return CATS[i];
+    return { color: "var(--ink-soft)", bg: "var(--surface-2)" };
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return "—";
+    var p = String(iso).split("-");
+    if (p.length !== 3) return iso;
+    return p[2] + "/" + p[1] + "/" + p[0];
+  }
+
+  function renderTabs() {
+    var el = document.getElementById("tabs");
+    el.innerHTML = TABS.map(function (t) {
+      return '<button type="button" class="tab-btn" role="tab" data-tab="' + t.key + '" aria-selected="' + (t.key === activeTab) + '">' + escapeHtml(t.label) + "</button>";
+    }).join("");
+    Array.prototype.forEach.call(el.querySelectorAll(".tab-btn"), function (btn) {
+      btn.addEventListener("click", function () {
+        activeTab = btn.getAttribute("data-tab");
+        try { localStorage.setItem("radar-clima-tab", activeTab); } catch (e) {}
+        applyTab();
+      });
+    });
+  }
+
+  function applyTab() {
+    TABS.forEach(function (t) {
+      var panel = document.getElementById("panel-" + t.key);
+      if (panel) panel.hidden = (t.key !== activeTab);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".tab-btn"), function (btn) {
+      btn.setAttribute("aria-selected", String(btn.getAttribute("data-tab") === activeTab));
+    });
+    document.getElementById("filters").style.display = (activeTab === "noticias") ? "flex" : "none";
+  }
+
+  function renderFilters() {
+    var el = document.getElementById("filters");
+    var opts = [{ key: "Todos", color: "var(--ink)", bg: null }].concat(CATS);
+    el.innerHTML = opts.map(function (o) {
+      var dot = o.bg ? '<span class="dot" style="background:' + o.color + '"></span>' : "";
+      return '<button type="button" class="filter-btn" data-filter="' + escapeHtml(o.key) + '" aria-pressed="' + (o.key === activeFilter) + '">' + dot + escapeHtml(o.key) + "</button>";
+    }).join("");
+    Array.prototype.forEach.call(el.querySelectorAll(".filter-btn"), function (btn) {
+      btn.addEventListener("click", function () {
+        activeFilter = btn.getAttribute("data-filter");
+        Array.prototype.forEach.call(el.querySelectorAll(".filter-btn"), function (b) {
+          b.setAttribute("aria-pressed", String(b === btn));
+        });
+        renderCities();
+      });
+    });
+  }
+
+  function renderStats() {
+    var row = document.getElementById("stats-row");
+    var byCity = {};
+    CITIES.forEach(function (c) { byCity[c.key] = 0; });
+    allItems.forEach(function (it) { if (byCity[it.cidade] != null) byCity[it.cidade]++; });
+    row.innerHTML = CITIES.map(function (c) {
+      return '<span class="stat-pill">' + c.label + ': <b>' + byCity[c.key] + "</b></span>";
+    }).join("");
+    document.getElementById("total-itens-row").textContent = allItems.length + " itens no histórico";
+  }
+
+  function cardHtml(it) {
+    var ci = catInfo(it.categoria);
+    var flag = it.flag_framework && it.flag_framework !== "nenhuma"
+      ? '<div class="flag"><b>Toca o framework:</b> ' + escapeHtml(it.flag_framework) + "</div>"
+      : "";
+    return (
+      '<article class="card" style="--cat-color:' + ci.color + ";--cat-bg:" + ci.bg + '">' +
+        '<div class="card-top">' +
+          '<span class="cat-chip">' + escapeHtml(it.categoria) + "</span>" +
+          '<span class="card-date">' + fmtDate(it.data) + "</span>" +
+          '<span>·</span><span>' + escapeHtml(it.veiculo) + "</span>" +
+        "</div>" +
+        '<h3><a href="' + escapeHtml(it.link) + '" target="_blank" rel="noopener">' + escapeHtml(it.manchete_original) + "</a></h3>" +
+        '<p class="resumo">' + escapeHtml(it.resumo_pt) + "</p>" +
+        flag +
+      "</article>"
+    );
+  }
+
+  function renderCities() {
+    var content = document.getElementById("content");
+    content.innerHTML = "";
+    CITIES.forEach(function (city) {
+      var items = allItems.filter(function (it) { return it.cidade === city.key; });
+      if (activeFilter !== "Todos") items = items.filter(function (it) { return it.categoria === activeFilter; });
+      items.sort(function (a, b) { return (b.data || "").localeCompare(a.data || ""); });
+
+      var sec = document.createElement("section");
+      sec.className = "city";
+      var head = '<div class="city-head"><h2>' + city.label + "</h2>" +
+        '<span class="city-count">' + items.length + (activeFilter === "Todos" ? " itens" : " itens nesta categoria") + "</span></div>";
+      var body;
+      if (items.length === 0) {
+        body = '<p class="empty-note">Nenhum item' + (activeFilter !== "Todos" ? " nesta categoria" : " registrado ainda") + " para " + city.label + ".</p>";
+      } else {
+        body = '<div class="cards">' + items.map(cardHtml).join("") + "</div>";
+      }
+      sec.innerHTML = head + body;
+      content.appendChild(sec);
+    });
+  }
+
+  function notaHtml(n) {
+    return (
+      '<div class="nota"><div class="nota-date">' + fmtDate(n.data) + "</div>" +
+      "<p>" + escapeHtml(n.texto).replace(/\n/g, "<br>") + "</p></div>"
+    );
+  }
+
+  function renderNotas() {
+    var el = document.getElementById("notas-list");
+    if (!notas.length) {
+      el.innerHTML = '<p class="empty-note">Nenhuma nota registrada ainda.</p>';
+      return;
+    }
+    var sorted = notas.slice().sort(function (a, b) { return (b.data || "").localeCompare(a.data || ""); });
+    el.innerHTML = sorted.map(notaHtml).join("");
+  }
+
+  function renderSinteseTab(containerId, tipo, emptyMsg) {
+    var el = document.getElementById(containerId);
+    el.innerHTML = CITIES.map(function (city) {
+      var doc = sintese[city.key + "-" + tipo];
+      var body = doc && doc.texto
+        ? '<div class="updated">Atualizado em ' + fmtDate(doc.atualizado_em) + '</div><p>' + escapeHtml(doc.texto) + "</p>"
+        : '<p class="empty-note">' + emptyMsg + "</p>";
+      return (
+        '<section class="city">' +
+          '<div class="city-head"><h2>' + city.label + "</h2></div>" +
+          '<div class="sintese-card">' + body + "</div>" +
+        "</section>"
+      );
+    }).join("");
+  }
+
+  function tokenize(text) {
+    if (!text) return [];
+    var matches = String(text).toLowerCase().match(/[a-zà-öø-ÿ]{3,}/gi);
+    return matches || [];
+  }
+
+  function buildCloud(items) {
+    var freq = {};
+    items.forEach(function (it) {
+      tokenize(it.manchete_original).concat(tokenize(it.resumo_pt)).forEach(function (w) {
+        if (STOPWORDS[w]) return;
+        freq[w] = (freq[w] || 0) + 1;
+      });
+    });
+    var entries = Object.keys(freq).map(function (w) { return [w, freq[w]]; });
+    entries.sort(function (a, b) { return b[1] - a[1]; });
+    return entries.slice(0, 36);
+  }
+
+  function renderNuvem() {
+    var el = document.getElementById("content-nuvem");
+    el.innerHTML = CITIES.map(function (city) {
+      var items = allItems.filter(function (it) { return it.cidade === city.key; });
+      var words = buildCloud(items);
+      var body;
+      if (!words.length) {
+        body = '<p class="empty-note">Sem itens suficientes ainda para gerar a nuvem.</p>';
+      } else {
+        var max = words[0][1], min = words[words.length - 1][1];
+        body = '<div class="cloud-box">' + words.map(function (w) {
+          var t = max === min ? 1 : (w[1] - min) / (max - min);
+          var size = (0.82 + t * 1.5).toFixed(2);
+          var weight = t > 0.55 ? 700 : 500;
+          return '<span class="cloud-word" style="font-size:' + size + 'rem;font-weight:' + weight + '" title="' + w[1] + ' menção(ões)">' + escapeHtml(w[0]) + "</span>";
+        }).join("") + "</div>";
+      }
+      return '<section class="city"><div class="city-head"><h2>' + city.label + "</h2></div>" + body + "</section>";
+    }).join("");
+  }
+
+  function renderAtores() {
+    var el = document.getElementById("content-atores");
+    el.innerHTML = CITIES.map(function (city) {
+      var items = allItems.filter(function (it) { return it.cidade === city.key; });
+      var pessoas = {}, instituicoes = {};
+      items.forEach(function (it) {
+        (it.atores || []).forEach(function (a) {
+          if (!a || !a.nome) return;
+          var bucket = a.tipo === "pessoa" ? pessoas : instituicoes;
+          bucket[a.nome] = (bucket[a.nome] || 0) + 1;
+        });
+      });
+      function toRows(map) {
+        return Object.keys(map).map(function (n) { return [n, map[n]]; })
+          .sort(function (a, b) { return b[1] - a[1]; });
+      }
+      var pRows = toRows(pessoas), iRows = toRows(instituicoes);
+      function rowsHtml(rows, emptyMsg) {
+        if (!rows.length) return '<p class="empty-note">' + emptyMsg + "</p>";
+        return rows.map(function (r) {
+          return '<div class="ator-row"><span>' + escapeHtml(r[0]) + '</span><span class="count">' + r[1] + "×</span></div>";
+        }).join("");
+      }
+      return (
+        '<section class="city">' +
+          '<div class="city-head"><h2>' + city.label + "</h2></div>" +
+          '<div class="atores-grid">' +
+            '<div class="atores-col"><h4>Pessoas</h4>' + rowsHtml(pRows, "Nenhuma pessoa identificada ainda.") + "</div>" +
+            '<div class="atores-col"><h4>Instituições</h4>' + rowsHtml(iRows, "Nenhuma instituição identificada ainda.") + "</div>" +
+          "</div>" +
+        "</section>"
+      );
+    }).join("");
+  }
+
+  async function boot() {
+    try {
+      var saved = localStorage.getItem("radar-clima-tab");
+      if (saved && TABS.some(function (t) { return t.key === saved; })) activeTab = saved;
+    } catch (e) {}
+
+    renderTabs();
+    renderFilters();
+    applyTab();
+
+    var data = null;
+    try {
+      var res = await fetch("data.json", { cache: "no-store" });
+      data = await res.json();
+    } catch (e) { data = null; }
+
+    if (!data) {
+      ["content", "content-politico", "content-resumo", "content-nuvem", "content-atores"].forEach(function (id) {
+        document.getElementById(id).innerHTML = '<div class="db-error">Não foi possível carregar data.json. Verifique se o arquivo está ao lado deste index.html.</div>';
+      });
+      document.getElementById("notas-list").innerHTML = "";
+      return;
+    }
+
+    allItems = data.items || [];
+    notas = data.notas || [];
+    sintese = data.sintese || {};
+
+    renderStats();
+    renderCities();
+    renderNuvem();
+    renderAtores();
+    renderNotas();
+    renderSinteseTab("content-politico", "politico", "Síntese de clima político ainda não gerada para esta cidade.");
+    renderSinteseTab("content-resumo", "resumo", "Síntese de acontecimentos ainda não gerada para esta cidade.");
+
+    if (data.meta && data.meta.ultima_atualizacao) {
+      document.getElementById("ultima-atualizacao").textContent = fmtDate(data.meta.ultima_atualizacao);
+    }
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
