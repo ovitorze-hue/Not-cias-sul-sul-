@@ -338,6 +338,10 @@
   .sintese-card .updated { font-size: 0.76rem; color: var(--ink-soft); margin-bottom: 8px; }
   .sintese-card p { font-size: 0.95rem; line-height: 1.6; margin: 0; }
 
+  .relatorio-card { max-width: none; }
+  .relatorio-card .updated { font-size: 0.76rem; color: var(--ink-soft); margin-bottom: 8px; }
+  .relatorio-texto { font-size: 0.95rem; line-height: 1.65; }
+
   .tab-intro {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -539,6 +543,11 @@
     <div id="content-contexto"><div class="loading">Carregando…</div></div>
   </div>
 
+  <div class="tabpanel" id="panel-relatorios" role="tabpanel" hidden>
+    <p class="tab-intro">Repositório de relatórios semanais de leitura transversal — análise político-contextual que liga os principais acontecimentos da semana e compara o que tem acontecido em Recife, Cidade do Cabo e Mumbai. Um relatório por semana, mais recente primeiro.</p>
+    <div id="content-relatorios"><div class="loading">Carregando…</div></div>
+  </div>
+
   <div class="tabpanel" id="panel-triagem" role="tabpanel" hidden>
     <p class="tab-intro">Achados de uma varredura ampla, ainda não avaliados. Use os filtros abaixo para restringir por cidade ou por tipo de pesquisa. Itens marcados como "Integrar ao painel" passam a compor o Painel de notícias; itens marcados como "Descartar" saem da triagem. Essa ação só fica disponível para o pesquisador logado (link "Entrar" no topo da página).</p>
     <div id="content-triagem"><div class="loading">Carregando…</div></div>
@@ -613,7 +622,8 @@
     { key: "contexto", label: "Contexto político-institucional" },
     { key: "nuvem", label: "Nuvem de palavras" },
     { key: "atores", label: "Atores" },
-    { key: "resumo", label: "Resumo" }
+    { key: "resumo", label: "Resumo" },
+    { key: "relatorios", label: "Relatórios semanais" }
   ];
 
   var STOPWORDS = {};
@@ -656,6 +666,7 @@
   var MESES_PT = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
   var currentUser = null;
   var candidatos = [];
+  var relatorios = [];
 
   function catInfo(key) {
     for (var i = 0; i < CATS.length; i++) if (CATS[i].key === key) return CATS[i];
@@ -873,6 +884,30 @@
     }
     var sorted = notas.slice().sort(function (a, b) { return (b.data || "").localeCompare(a.data || ""); });
     el.innerHTML = sorted.map(notaHtml).join("");
+  }
+
+  function relatorioHtml(r) {
+    var periodo = (r.semana_inicio ? fmtDate(r.semana_inicio) : "?") + " – " + (r.semana_fim ? fmtDate(r.semana_fim) : "?");
+    var titulo = r.titulo ? escapeHtml(r.titulo) : "Relatório semanal";
+    var gerado = r.gerado_em ? '<div class="updated">Gerado em ' + fmtDate(r.gerado_em) + "</div>" : "";
+    return (
+      '<article class="card relatorio-card" style="--cat-color:var(--ink-soft);--cat-bg:var(--surface-2)">' +
+        '<div class="card-top"><span class="cat-chip">Semana de ' + escapeHtml(periodo) + "</span></div>" +
+        "<h3>" + titulo + "</h3>" +
+        gerado +
+        '<div class="relatorio-texto">' + escapeHtml(r.texto || "").replace(/\n/g, "<br>") + "</div>" +
+      "</article>"
+    );
+  }
+
+  function renderRelatorios() {
+    var el = document.getElementById("content-relatorios");
+    if (!relatorios.length) {
+      el.innerHTML = '<p class="empty-note">Nenhum relatório semanal gerado ainda.</p>';
+      return;
+    }
+    var sorted = relatorios.slice().sort(function (a, b) { return (b.semana_inicio || "").localeCompare(a.semana_inicio || ""); });
+    el.innerHTML = '<div class="cards">' + sorted.map(relatorioHtml).join("") + "</div>";
   }
 
   function renderSinteseTab(containerId, tipo, emptyMsg) {
@@ -1300,7 +1335,8 @@
       getAllMap("sintese"),
       getAllMap("contexto_sintese"),
       getAllArray("notas"),
-      getAllMap("meta")
+      getAllMap("meta"),
+      getAllArray("relatorios_semanais")
     ]);
     return {
       items: results[0],
@@ -1309,7 +1345,8 @@
       sintese: results[3],
       contexto_sintese: results[4],
       notas: results[5],
-      meta: results[6].info || {}
+      meta: results[6].info || {},
+      relatorios_semanais: results[7]
     };
   }
 
@@ -1338,7 +1375,7 @@
     }
 
     if (!data) {
-      ["content", "content-politico", "content-resumo", "content-contexto", "content-nuvem", "content-atores", "content-triagem"].forEach(function (id) {
+      ["content", "content-politico", "content-resumo", "content-contexto", "content-nuvem", "content-atores", "content-triagem", "content-relatorios"].forEach(function (id) {
         document.getElementById(id).innerHTML = '<div class="db-error">Não foi possível carregar os dados do painel (nem do Firestore, nem do data.json local).</div>';
       });
       document.getElementById("notas-list").innerHTML = "";
@@ -1351,6 +1388,7 @@
     contextoItens = data.contexto_itens || [];
     contextoSintese = data.contexto_sintese || {};
     candidatos = data.candidatos || [];
+    relatorios = data.relatorios_semanais || [];
 
     renderStats();
     renderCities();
@@ -1361,6 +1399,7 @@
     renderSinteseTab("content-resumo", "resumo", "Síntese de acontecimentos ainda não gerada para esta cidade.");
     renderContexto();
     renderTriagem();
+    renderRelatorios();
 
     if (data.meta && data.meta.ultima_atualizacao) {
       document.getElementById("ultima-atualizacao").textContent = fmtDate(data.meta.ultima_atualizacao);
