@@ -24,6 +24,8 @@
     --cat-politico: #7a4fa0;
     --cat-politico-bg: #efe6f5;
 
+    --paper-rgb: 236, 238, 241;
+
     color-scheme: light dark;
   }
 
@@ -46,6 +48,8 @@
       --cat-informal-bg: #33270f;
       --cat-politico: #bd93da;
       --cat-politico-bg: #2b1f38;
+
+      --paper-rgb: 18, 22, 28;
     }
   }
 
@@ -67,6 +71,8 @@
     --cat-informal-bg: #33270f;
     --cat-politico: #bd93da;
     --cat-politico-bg: #2b1f38;
+
+    --paper-rgb: 18, 22, 28;
   }
 
   * { box-sizing: border-box; }
@@ -74,9 +80,16 @@
   html, body { margin: 0; padding: 0; }
 
   body {
-    background: var(--paper);
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(rgba(var(--paper-rgb), 0.70), rgba(var(--paper-rgb), 0.70)),
+      url("bg-recife.jpg");
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: cover;
+    background-attachment: fixed;
     color: var(--ink);
-    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    font-family: "Courier New", Courier, monospace;
     padding-inline: 16px;
     padding-block: 20px 48px;
   }
@@ -96,18 +109,23 @@
   }
 
   h1 {
-    font-family: "Newsreader", Georgia, serif;
-    font-weight: 600;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: 700;
     font-size: clamp(1.5rem, 4vw, 2rem);
     margin: 0 0 4px;
+    text-align: center;
     text-wrap: balance;
   }
 
   .subtitle {
-    color: var(--ink-soft);
+    color: #f2f2f2;
+    background: #000;
     font-size: 0.92rem;
     max-width: 62ch;
-    margin: 0 0 10px;
+    margin: 0 auto 10px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    text-align: center;
   }
 
   .meta-row {
@@ -191,6 +209,13 @@
     margin-right: 6px;
   }
 
+  .dataset-toggle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
   .tabpanel { padding-top: 8px; }
 
   section.city { margin-top: 30px; }
@@ -201,11 +226,14 @@
     align-items: baseline;
     gap: 10px;
     margin-bottom: 10px;
-    padding-bottom: 6px;
+    padding: 7px 12px 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-bottom: 2px solid var(--ink);
+    border-radius: 6px;
   }
   .city-head h2 {
-    font-family: "Newsreader", Georgia, serif;
+    font-family: "Courier New", Courier, monospace;
     font-size: 1.3rem;
     margin: 0;
   }
@@ -270,7 +298,7 @@
     border-top: 3px double var(--ink);
     padding-top: 16px;
   }
-  section.notas h2 { font-family: "Newsreader", Georgia, serif; font-size: 1.25rem; margin: 0 0 12px; }
+  section.notas h2 { font-family: "Courier New", Courier, monospace; font-size: 1.25rem; margin: 0 0 12px; }
   .nota {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -291,6 +319,19 @@
   .sintese-card .updated { font-size: 0.76rem; color: var(--ink-soft); margin-bottom: 8px; }
   .sintese-card p { font-size: 0.95rem; line-height: 1.6; margin: 0; }
 
+  .tab-intro {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+    max-width: 68ch;
+    margin: 0 0 16px;
+    line-height: 1.5;
+  }
+  .contexto-items { margin-top: 12px; }
+
   .cloud-box {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -304,7 +345,15 @@
   }
   .cloud-word { color: var(--ink); white-space: nowrap; }
 
-  .atores-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .atores-grid {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
   @media (max-width: 560px) { .atores-grid { grid-template-columns: 1fr; } }
   .atores-col h4 {
     font-size: 0.8rem;
@@ -325,16 +374,61 @@
 
   footer.disclaimer {
     margin-top: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
     font-size: 0.78rem;
     color: var(--ink-soft);
-    border-top: 1px solid var(--border);
-    padding-top: 12px;
+    padding: 14px 16px;
     line-height: 1.5;
   }
 
-  .loading, .db-error { font-size: 0.85rem; color: var(--ink-soft); padding: 20px 0; }
+  .loading, .db-error {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  /* Triagem (candidatos) */
+  .candidato-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    border-top: 1px dashed var(--border);
+    padding-top: 10px;
+  }
+  .candidato-btn {
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: default;
+  }
+  .candidato-btn.integrar {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--accent);
+    opacity: 0.55;
+  }
+  .candidato-btn.descartar {
+    background: var(--surface);
+    color: var(--ink-soft);
+    opacity: 0.55;
+  }
+  .candidato-note {
+    margin-top: 10px;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    border-top: 1px dashed var(--border);
+    padding-top: 10px;
+  }
+  .triagem-summary { font-size: 0.82rem; color: var(--ink-soft); margin: 0 0 4px; }
 </style>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 </head>
 <body>
 
@@ -356,10 +450,12 @@
   </div>
 
   <div class="tabpanel" id="panel-politico" role="tabpanel" hidden>
+    <p class="tab-intro">Síntese focada só na dinâmica político-institucional ligada ao escopo central da pesquisa (clima e informalidade) — decisões de prefeitura, orçamento, atores diretamente envolvidos. Para o panorama político mais amplo da cidade, veja a aba "Contexto político-institucional".</p>
     <div id="content-politico"><div class="loading">Carregando…</div></div>
   </div>
 
   <div class="tabpanel" id="panel-resumo" role="tabpanel" hidden>
+    <p class="tab-intro">Resumo geral dos principais acontecimentos da cidade nesta janela, somando o escopo central da pesquisa (clima, remoções, soluções comunitárias, infraestrutura) e o panorama político-institucional mais amplo captado em "Contexto político-institucional".</p>
     <div id="content-resumo"><div class="loading">Carregando…</div></div>
   </div>
 
@@ -371,13 +467,23 @@
     <div id="content-atores"><div class="loading">Carregando…</div></div>
   </div>
 
+  <div class="tabpanel" id="panel-contexto" role="tabpanel" hidden>
+    <p class="tab-intro">Temas quentes do debate público em cada cidade — não necessariamente sobre clima ou informalidade, mas relevantes como pano de fundo da pesquisa (ex.: eleições, disputas de poder, segurança, economia local). Mesmo padrão do resto do painel: só itens reais, com link verificável.</p>
+    <div id="content-contexto"><div class="loading">Carregando…</div></div>
+  </div>
+
+  <div class="tabpanel" id="panel-triagem" role="tabpanel" hidden>
+    <p class="tab-intro">Achados de uma varredura ampla, ainda não avaliados. Esta cópia estática é só leitura — a triagem (integrar ou descartar cada item) é feita na versão viva do painel (o Artifact no Claude).</p>
+    <div id="content-triagem"><div class="loading">Carregando…</div></div>
+  </div>
+
   <section class="notas">
     <h2>Leitura transversal (notas semanais)</h2>
     <div id="notas-list"><div class="loading">Carregando notas…</div></div>
   </section>
 
   <footer class="disclaimer">
-    Este painel é um radar de desk research para acompanhamento interno da pesquisa — não é uma fonte citável por si mesma. Itens incluídos apenas quando localizados com link real via busca; nenhum item é inventado para preencher categorias ou semanas. As abas "Clima político" e "Resumo" são sínteses escritas a partir dos itens coletados, revisadas a cada atualização; "Nuvem de palavras" e "Atores" são calculadas automaticamente a partir dos textos e das entidades marcadas em cada item.
+    Este painel é um radar de desk research para acompanhamento interno da pesquisa — não é uma fonte citável por si mesma. Itens incluídos apenas quando localizados com link real via busca; nenhum item é inventado para preencher categorias ou semanas. As abas "Política climática institucional" e "Resumo" são sínteses escritas a partir dos itens coletados, revisadas a cada atualização — a primeira focada só na dinâmica institucional do escopo central da pesquisa, a segunda cobrindo o conjunto de acontecimentos da cidade, incluindo o panorama político mais amplo captado em "Contexto político-institucional". "Nuvem de palavras" e "Atores" são calculadas automaticamente a partir dos textos e das entidades marcadas em cada item, e podem ser filtradas entre o conjunto de notícias sobre clima/informalidade e o conjunto de contexto político-institucional. A aba "Contexto político-institucional" reúne notícias reais sobre temas quentes do debate público local que não se enquadram nas quatro categorias da pesquisa, mas ajudam a entender o cenário em que ela acontece. A aba "Triagem" reúne achados de varreduras amplas ainda não avaliados; só passam a integrar o corpus de "Notícias" ou "Contexto político-institucional" os itens marcados manualmente como "Integrar ao painel" (na versão viva do painel).
   </footer>
 </div>
 
@@ -396,10 +502,12 @@
   ];
   var TABS = [
     { key: "noticias", label: "Notícias" },
-    { key: "politico", label: "Clima político" },
+    { key: "politico", label: "Política climática institucional" },
     { key: "resumo", label: "Resumo" },
+    { key: "contexto", label: "Contexto político-institucional" },
     { key: "nuvem", label: "Nuvem de palavras" },
-    { key: "atores", label: "Atores" }
+    { key: "atores", label: "Atores" },
+    { key: "triagem", label: "Triagem" }
   ];
 
   var STOPWORDS = {};
@@ -421,6 +529,15 @@
   var allItems = [];
   var sintese = {};
   var notas = [];
+  var contextoItens = [];
+  var contextoSintese = {};
+  var nuvemDataset = "clima";
+  var atoresDataset = "clima";
+  var DATASETS = [
+    { key: "clima", label: "Notícias sobre clima" },
+    { key: "contexto", label: "Contexto político-institucional" }
+  ];
+  var candidatos = [];
 
   function catInfo(key) {
     for (var i = 0; i < CATS.length; i++) if (CATS[i].key === key) return CATS[i];
@@ -569,6 +686,113 @@
     }).join("");
   }
 
+  function contextoCardHtml(it) {
+    return (
+      '<article class="card" style="--cat-color:var(--ink-soft);--cat-bg:var(--surface-2)">' +
+        '<div class="card-top">' +
+          (it.tema ? '<span class="cat-chip">' + escapeHtml(it.tema) + "</span>" : "") +
+          '<span class="card-date">' + fmtDate(it.data) + "</span>" +
+          '<span>·</span><span>' + escapeHtml(it.veiculo) + "</span>" +
+        "</div>" +
+        '<h3><a href="' + escapeHtml(it.link) + '" target="_blank" rel="noopener">' + escapeHtml(it.manchete_original) + "</a></h3>" +
+        '<p class="resumo">' + escapeHtml(it.resumo_pt) + "</p>" +
+      "</article>"
+    );
+  }
+
+  function renderContexto() {
+    var el = document.getElementById("content-contexto");
+    el.innerHTML = CITIES.map(function (city) {
+      var doc = contextoSintese[city.key + "-contexto"];
+      var sinteseBody = doc && doc.texto
+        ? '<div class="updated">Atualizado em ' + fmtDate(doc.atualizado_em) + '</div><p>' + escapeHtml(doc.texto) + "</p>"
+        : '<p class="empty-note">Síntese de contexto ainda não gerada para esta cidade.</p>';
+
+      var items = contextoItens.filter(function (it) { return it.cidade === city.key; });
+      items.sort(function (a, b) { return (b.data || "").localeCompare(a.data || ""); });
+      var itemsBody = items.length
+        ? '<div class="cards">' + items.map(contextoCardHtml).join("") + "</div>"
+        : '<p class="empty-note">Nenhum item de contexto registrado ainda para ' + city.label + ".</p>";
+
+      return (
+        '<section class="city">' +
+          '<div class="city-head"><h2>' + city.label + "</h2>" +
+          '<span class="city-count">' + items.length + " itens</span></div>" +
+          '<div class="sintese-card">' + sinteseBody + "</div>" +
+          '<div class="contexto-items">' + itemsBody + "</div>" +
+        "</section>"
+      );
+    }).join("");
+  }
+
+  // ---------- Triagem (candidatos de varredura ampla — cópia estática, só leitura) ----------
+  function candidatoCardHtml(it) {
+    var label = it.tipo_pesquisa === "contexto"
+      ? ("Contexto — " + (it.tema || "tema não especificado"))
+      : ("Central — " + (it.categoria || "categoria não especificada"));
+    return (
+      '<article class="card" style="--cat-color:var(--ink-soft);--cat-bg:var(--surface-2)">' +
+        '<div class="card-top">' +
+          '<span class="cat-chip">' + escapeHtml(label) + "</span>" +
+          '<span class="card-date">' + fmtDate(it.data) + "</span>" +
+          '<span>·</span><span>' + escapeHtml(it.veiculo) + "</span>" +
+        "</div>" +
+        '<h3><a href="' + escapeHtml(it.link) + '" target="_blank" rel="noopener">' + escapeHtml(it.manchete_original) + "</a></h3>" +
+        '<p class="resumo">' + escapeHtml(it.resumo_pt) + "</p>" +
+        '<div class="candidato-actions">' +
+          '<button type="button" class="candidato-btn integrar" disabled>Integrar ao painel</button>' +
+          '<button type="button" class="candidato-btn descartar" disabled>Descartar</button>' +
+        "</div>" +
+        '<div class="candidato-note">Ação só disponível na versão viva do painel (o Artifact no Claude).</div>' +
+      "</article>"
+    );
+  }
+
+  function renderTriagem() {
+    var el = document.getElementById("content-triagem");
+    var pending = candidatos.filter(function (c) { return c.status === "pendente"; });
+    if (!pending.length) {
+      el.innerHTML = '<p class="empty-note">Nenhum item aguardando triagem no momento.</p>';
+      return;
+    }
+    var summary = '<p class="triagem-summary">' + pending.length + " item(ns) aguardando avaliação.</p>";
+    var citiesHtml = CITIES.map(function (city) {
+      var items = pending.filter(function (it) { return it.cidade === city.key; });
+      if (!items.length) return "";
+      items.sort(function (a, b) { return (b.data || "").localeCompare(a.data || ""); });
+      return (
+        '<section class="city">' +
+          '<div class="city-head"><h2>' + city.label + "</h2>" +
+          '<span class="city-count">' + items.length + " itens</span></div>" +
+          '<div class="cards">' + items.map(candidatoCardHtml).join("") + "</div>" +
+        "</section>"
+      );
+    }).join("");
+    el.innerHTML = summary + citiesHtml;
+  }
+
+  // ---------- Filtro de conjunto (Nuvem / Atores) ----------
+  function datasetItems(key) {
+    return key === "contexto" ? contextoItens : allItems;
+  }
+
+  function datasetToggleHtml(current) {
+    return '<div class="dataset-toggle" role="group" aria-label="Filtrar conjunto de notícias">' +
+      DATASETS.map(function (d) {
+        return '<button type="button" class="filter-btn dataset-btn" data-dataset="' + d.key + '" aria-pressed="' + (d.key === current) + '">' + escapeHtml(d.label) + "</button>";
+      }).join("") +
+      "</div>";
+  }
+
+  function wireDatasetToggle(el, setCurrent, rerender) {
+    Array.prototype.forEach.call(el.querySelectorAll(".dataset-btn"), function (btn) {
+      btn.addEventListener("click", function () {
+        setCurrent(btn.getAttribute("data-dataset"));
+        rerender();
+      });
+    });
+  }
+
   function tokenize(text) {
     if (!text) return [];
     var matches = String(text).toLowerCase().match(/[a-zà-öø-ÿ]{3,}/gi);
@@ -590,8 +814,9 @@
 
   function renderNuvem() {
     var el = document.getElementById("content-nuvem");
-    el.innerHTML = CITIES.map(function (city) {
-      var items = allItems.filter(function (it) { return it.cidade === city.key; });
+    var source = datasetItems(nuvemDataset);
+    var citiesHtml = CITIES.map(function (city) {
+      var items = source.filter(function (it) { return it.cidade === city.key; });
       var words = buildCloud(items);
       var body;
       if (!words.length) {
@@ -607,12 +832,15 @@
       }
       return '<section class="city"><div class="city-head"><h2>' + city.label + "</h2></div>" + body + "</section>";
     }).join("");
+    el.innerHTML = datasetToggleHtml(nuvemDataset) + citiesHtml;
+    wireDatasetToggle(el, function (v) { nuvemDataset = v; }, renderNuvem);
   }
 
   function renderAtores() {
     var el = document.getElementById("content-atores");
-    el.innerHTML = CITIES.map(function (city) {
-      var items = allItems.filter(function (it) { return it.cidade === city.key; });
+    var source = datasetItems(atoresDataset);
+    var citiesHtml = CITIES.map(function (city) {
+      var items = source.filter(function (it) { return it.cidade === city.key; });
       var pessoas = {}, instituicoes = {};
       items.forEach(function (it) {
         (it.atores || []).forEach(function (a) {
@@ -642,6 +870,8 @@
         "</section>"
       );
     }).join("");
+    el.innerHTML = datasetToggleHtml(atoresDataset) + citiesHtml;
+    wireDatasetToggle(el, function (v) { atoresDataset = v; }, renderAtores);
   }
 
   async function boot() {
@@ -661,7 +891,7 @@
     } catch (e) { data = null; }
 
     if (!data) {
-      ["content", "content-politico", "content-resumo", "content-nuvem", "content-atores"].forEach(function (id) {
+      ["content", "content-politico", "content-resumo", "content-contexto", "content-nuvem", "content-atores", "content-triagem"].forEach(function (id) {
         document.getElementById(id).innerHTML = '<div class="db-error">Não foi possível carregar data.json. Verifique se o arquivo está ao lado deste index.html.</div>';
       });
       document.getElementById("notas-list").innerHTML = "";
@@ -671,14 +901,19 @@
     allItems = data.items || [];
     notas = data.notas || [];
     sintese = data.sintese || {};
+    contextoItens = data.contexto_itens || [];
+    contextoSintese = data.contexto_sintese || {};
+    candidatos = data.candidatos || [];
 
     renderStats();
     renderCities();
     renderNuvem();
     renderAtores();
     renderNotas();
-    renderSinteseTab("content-politico", "politico", "Síntese de clima político ainda não gerada para esta cidade.");
+    renderSinteseTab("content-politico", "politico", "Síntese de política climática institucional ainda não gerada para esta cidade.");
     renderSinteseTab("content-resumo", "resumo", "Síntese de acontecimentos ainda não gerada para esta cidade.");
+    renderContexto();
+    renderTriagem();
 
     if (data.meta && data.meta.ultima_atualizacao) {
       document.getElementById("ultima-atualizacao").textContent = fmtDate(data.meta.ultima_atualizacao);
