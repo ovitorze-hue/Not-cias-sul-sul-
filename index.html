@@ -216,6 +216,25 @@
     margin-bottom: 16px;
   }
 
+  .periodo-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+  }
+  .period-select {
+    font: inherit;
+    font-size: 0.8rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
   .tabpanel { padding-top: 8px; }
 
   section.city { margin-top: 30px; }
@@ -428,6 +447,52 @@
     padding-top: 10px;
   }
   .triagem-summary { font-size: 0.82rem; color: var(--ink-soft); margin: 0 0 4px; }
+
+  .auth-box {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin: 2px 0 4px;
+  }
+  .auth-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--link);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.78rem;
+    text-decoration: underline;
+  }
+  .auth-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .auth-form input {
+    font: inherit;
+    font-size: 0.78rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  .auth-form button {
+    font: inherit;
+    font-size: 0.78rem;
+    border: 1px solid var(--border);
+    background: var(--ink);
+    color: var(--paper);
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .auth-error { color: #b3261e; font-size: 0.76rem; margin-top: 4px; }
+  .candidato-actions button:not(:disabled) { cursor: pointer; opacity: 1; }
+  .candidato-btn:not(:disabled).integrar { opacity: 1; }
+  .candidato-btn:not(:disabled).descartar { opacity: 1; }
 </style>
 </head>
 <body>
@@ -440,12 +505,14 @@
       <span>Última atualização: <strong id="ultima-atualizacao">—</strong></span>
       <span id="total-itens-row">—</span>
     </div>
+    <div class="auth-box" id="auth-box"></div>
     <div class="stats" id="stats-row"></div>
     <nav class="tabs" id="tabs" role="tablist" aria-label="Seções do painel"></nav>
     <div class="filters" id="filters" role="group" aria-label="Filtrar por categoria"></div>
   </header>
 
   <div class="tabpanel" id="panel-noticias" role="tabpanel">
+    <p class="tab-intro">Corpus geral de notícias já integradas — reúne tanto o escopo central ("Política climática institucional") quanto o "Contexto político-institucional", cada item identificado por tipo. Use os filtros de cidade, tipo de pesquisa e período abaixo, além do filtro de categoria acima, para restringir a visualização.</p>
     <div id="content"><div class="loading">Carregando itens do painel…</div></div>
   </div>
 
@@ -473,7 +540,7 @@
   </div>
 
   <div class="tabpanel" id="panel-triagem" role="tabpanel" hidden>
-    <p class="tab-intro">Achados de uma varredura ampla, ainda não avaliados. Use os filtros abaixo para restringir por cidade ou por tipo de pesquisa. Esta cópia estática é só leitura — a triagem (integrar ou descartar cada item) é feita na versão viva do painel (o Artifact no Claude).</p>
+    <p class="tab-intro">Achados de uma varredura ampla, ainda não avaliados. Use os filtros abaixo para restringir por cidade ou por tipo de pesquisa. Esta cópia estática é só leitura — a triagem (integrar ou descartar cada item) é feita na <a href="https://claude.ai/artifact/4gyAS7krXsyPRWfgf876Xi" target="_blank" rel="noopener">versão viva do painel (o Artifact no Claude)</a>.</p>
     <div id="content-triagem"><div class="loading">Carregando…</div></div>
   </div>
 
@@ -483,9 +550,48 @@
   </section>
 
   <footer class="disclaimer">
-    Este painel é um radar de desk research para acompanhamento interno da pesquisa — não é uma fonte citável por si mesma. Itens incluídos apenas quando localizados com link real via busca; nenhum item é inventado para preencher categorias ou semanas. A aba "Política climática institucional" é uma síntese focada só na dinâmica institucional do escopo central da pesquisa; a aba "Resumo" é uma análise crítica que cruza esse escopo central com o panorama mais amplo captado em "Contexto político-institucional", revisada a cada atualização. "Nuvem de palavras" e "Atores" são calculadas automaticamente a partir dos textos e das entidades marcadas em cada item, e podem ser filtradas entre o conjunto de notícias sobre clima/informalidade e o conjunto de contexto político-institucional. A aba "Contexto político-institucional" reúne notícias reais sobre temas quentes do debate público local que não se enquadram nas quatro categorias da pesquisa, mas ajudam a entender o cenário em que ela acontece. A aba "Triagem" reúne achados de varreduras amplas ainda não avaliados, com filtros por cidade e por tipo de pesquisa; só passam a integrar o corpus de "Painel de notícias" ou "Contexto político-institucional" os itens marcados manualmente como "Integrar ao painel" (na versão viva do painel).
+    Este painel é um radar de desk research para acompanhamento interno da pesquisa — não é uma fonte citável por si mesma. Itens incluídos apenas quando localizados com link real via busca; nenhum item é inventado para preencher categorias ou semanas. A aba "Painel de notícias" é o corpus geral e acumulativo — todo item integrado passa a aparecer ali, filtrável por cidade, tipo de pesquisa, período e categoria. A aba "Política climática institucional" é uma síntese focada só na dinâmica institucional do escopo central da pesquisa; a aba "Resumo" é uma análise crítica que cruza esse escopo central com o panorama mais amplo captado em "Contexto político-institucional", revisada a cada atualização. "Nuvem de palavras" e "Atores" são calculadas automaticamente a partir dos textos e das entidades marcadas em cada item, e podem ser filtradas entre o conjunto de notícias sobre clima/informalidade e o conjunto de contexto político-institucional. A aba "Contexto político-institucional" reúne notícias reais sobre temas quentes do debate público local que não se enquadram nas quatro categorias da pesquisa, mas ajudam a entender o cenário em que ela acontece. A aba "Triagem" reúne achados de varreduras amplas ainda não avaliados, com filtros por cidade e por tipo de pesquisa; só passam a integrar o corpus os itens marcados manualmente como "Integrar ao painel" (na versão viva do painel).
   </footer>
 </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import {
+    getFirestore, collection, getDocs, doc, setDoc, deleteDoc
+  } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+  import {
+    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+  } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
+  var firebaseConfig = {
+    apiKey: "AIzaSyCLucsx_7U4zNVS9325ZYAbXBUQRQH6m44",
+    authDomain: "radar-clima-sul-sul.firebaseapp.com",
+    projectId: "radar-clima-sul-sul",
+    storageBucket: "radar-clima-sul-sul.firebasestorage.app",
+    messagingSenderId: "290051992381",
+    appId: "1:290051992381:web:8b8b7dca1070f880ceb354",
+    measurementId: "G-9DB2WLFLJY"
+  };
+
+  var app = initializeApp(firebaseConfig);
+  var db = getFirestore(app);
+  var auth = getAuth(app);
+
+  window.FB = {
+    db: db,
+    auth: auth,
+    collection: collection,
+    getDocs: getDocs,
+    doc: doc,
+    setDoc: setDoc,
+    deleteDoc: deleteDoc,
+    signIn: function (email, password) { return signInWithEmailAndPassword(auth, email, password); },
+    signOut: function () { return signOut(auth); },
+    onAuthStateChanged: function (cb) { return onAuthStateChanged(auth, cb); }
+  };
+
+  window.dispatchEvent(new Event("firebase-ready"));
+</script>
 
 <script>
 (function () {
@@ -544,6 +650,11 @@
     { key: "central", label: "Política climática institucional" },
     { key: "contexto", label: "Contexto político-institucional" }
   ];
+  var noticiasCidade = "todas";
+  var noticiasTipo = "todos";
+  var noticiasPeriodo = "todos";
+  var MESES_PT = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+  var currentUser = null;
   var candidatos = [];
 
   function catInfo(key) {
@@ -612,10 +723,11 @@
     var byCity = {};
     CITIES.forEach(function (c) { byCity[c.key] = 0; });
     allItems.forEach(function (it) { if (byCity[it.cidade] != null) byCity[it.cidade]++; });
+    contextoItens.forEach(function (it) { if (byCity[it.cidade] != null) byCity[it.cidade]++; });
     row.innerHTML = CITIES.map(function (c) {
       return '<span class="stat-pill">' + c.label + ': <b>' + byCity[c.key] + "</b></span>";
     }).join("");
-    document.getElementById("total-itens-row").textContent = allItems.length + " itens no histórico";
+    document.getElementById("total-itens-row").textContent = (allItems.length + contextoItens.length) + " itens no histórico";
   }
 
   function cardHtml(it) {
@@ -637,27 +749,113 @@
     );
   }
 
+  function periodKey(dateStr) {
+    if (!dateStr || dateStr.length < 7) return null;
+    return dateStr.slice(0, 7);
+  }
+
+  function periodLabel(key) {
+    var parts = key.split("-");
+    var mIdx = parseInt(parts[1], 10) - 1;
+    var mesNome = MESES_PT[mIdx] || parts[1];
+    return mesNome.charAt(0).toUpperCase() + mesNome.slice(1) + "/" + parts[0];
+  }
+
+  function tagTipo(it, tipo) {
+    var copy = {};
+    for (var k in it) { if (Object.prototype.hasOwnProperty.call(it, k)) copy[k] = it[k]; }
+    copy.tipo_pesquisa = tipo;
+    return copy;
+  }
+
+  function combinedNoticiaItems() {
+    var central = allItems.map(function (it) { return tagTipo(it, "central"); });
+    var ctx = contextoItens.map(function (it) { return tagTipo(it, "contexto"); });
+    return central.concat(ctx);
+  }
+
+  function noticiasPeriodosDisponiveis() {
+    var seen = {};
+    var list = [];
+    combinedNoticiaItems().forEach(function (it) {
+      var key = periodKey(it.data);
+      if (key && !seen[key]) { seen[key] = true; list.push(key); }
+    });
+    list.sort(function (a, b) { return b.localeCompare(a); });
+    return list.map(function (k) { return { key: k, label: periodLabel(k) }; });
+  }
+
+  function noticiaCardHtml(it) {
+    return it.tipo_pesquisa === "contexto" ? contextoCardHtml(it) : cardHtml(it);
+  }
+
+  function noticiasFiltersHtml() {
+    var cidadeOpts = [{ key: "todas", label: "Todas as cidades" }].concat(CITIES);
+    var cidadeHtml = '<div class="dataset-toggle" role="group" aria-label="Filtrar notícias por cidade">' +
+      cidadeOpts.map(function (c) {
+        return '<button type="button" class="filter-btn dataset-btn" data-noticias-cidade="' + c.key + '" aria-pressed="' + (c.key === noticiasCidade) + '">' + escapeHtml(c.label) + "</button>";
+      }).join("") +
+      "</div>";
+    var tipoHtml = '<div class="dataset-toggle" role="group" aria-label="Filtrar notícias por tipo de pesquisa">' +
+      TIPO_PESQUISA_FILTROS.map(function (t) {
+        return '<button type="button" class="filter-btn dataset-btn" data-noticias-tipo="' + t.key + '" aria-pressed="' + (t.key === noticiasTipo) + '">' + escapeHtml(t.label) + "</button>";
+      }).join("") +
+      "</div>";
+    var periodos = noticiasPeriodosDisponiveis();
+    var periodoHtml = '<div class="periodo-filter"><label for="noticias-periodo-select">Período:</label>' +
+      '<select id="noticias-periodo-select" class="period-select">' +
+      '<option value="todos"' + (noticiasPeriodo === "todos" ? " selected" : "") + '>Todos os períodos</option>' +
+      periodos.map(function (p) {
+        return '<option value="' + p.key + '"' + (p.key === noticiasPeriodo ? " selected" : "") + '>' + escapeHtml(p.label) + "</option>";
+      }).join("") +
+      "</select></div>";
+    return cidadeHtml + tipoHtml + periodoHtml;
+  }
+
+  function wireNoticiasFilters(el) {
+    Array.prototype.forEach.call(el.querySelectorAll("[data-noticias-cidade]"), function (btn) {
+      btn.addEventListener("click", function () {
+        noticiasCidade = btn.getAttribute("data-noticias-cidade");
+        renderCities();
+      });
+    });
+    Array.prototype.forEach.call(el.querySelectorAll("[data-noticias-tipo]"), function (btn) {
+      btn.addEventListener("click", function () {
+        noticiasTipo = btn.getAttribute("data-noticias-tipo");
+        renderCities();
+      });
+    });
+    var sel = el.querySelector("#noticias-periodo-select");
+    if (sel) {
+      sel.addEventListener("change", function () {
+        noticiasPeriodo = sel.value;
+        renderCities();
+      });
+    }
+  }
+
   function renderCities() {
     var content = document.getElementById("content");
-    content.innerHTML = "";
-    CITIES.forEach(function (city) {
-      var items = allItems.filter(function (it) { return it.cidade === city.key; });
-      if (activeFilter !== "Todos") items = items.filter(function (it) { return it.categoria === activeFilter; });
-      items.sort(function (a, b) { return (b.data || "").localeCompare(a.data || ""); });
-
-      var sec = document.createElement("section");
-      sec.className = "city";
-      var head = '<div class="city-head"><h2>' + city.label + "</h2>" +
-        '<span class="city-count">' + items.length + (activeFilter === "Todos" ? " itens" : " itens nesta categoria") + "</span></div>";
-      var body;
-      if (items.length === 0) {
-        body = '<p class="empty-note">Nenhum item' + (activeFilter !== "Todos" ? " nesta categoria" : " registrado ainda") + " para " + city.label + ".</p>";
-      } else {
-        body = '<div class="cards">' + items.map(cardHtml).join("") + "</div>";
-      }
-      sec.innerHTML = head + body;
-      content.appendChild(sec);
+    var filtersHtml = noticiasFiltersHtml();
+    var filtered = combinedNoticiaItems().filter(function (it) {
+      if (noticiasCidade !== "todas" && it.cidade !== noticiasCidade) return false;
+      if (noticiasTipo !== "todos" && it.tipo_pesquisa !== noticiasTipo) return false;
+      if (noticiasPeriodo !== "todos" && periodKey(it.data) !== noticiasPeriodo) return false;
+      if (activeFilter !== "Todos" && it.categoria !== activeFilter) return false;
+      return true;
     });
+    var citiesHtml = CITIES.map(function (city) {
+      var items = filtered.filter(function (it) { return it.cidade === city.key; });
+      items.sort(function (a, b) { return (b.data || "").localeCompare(a.data || ""); });
+      var head = '<div class="city-head"><h2>' + city.label + "</h2>" +
+        '<span class="city-count">' + items.length + " itens</span></div>";
+      var body = items.length
+        ? '<div class="cards">' + items.map(noticiaCardHtml).join("") + "</div>"
+        : '<p class="empty-note">Nenhum item corresponde aos filtros selecionados para ' + city.label + ".</p>";
+      return '<section class="city">' + head + body + "</section>";
+    }).join("");
+    content.innerHTML = filtersHtml + citiesHtml;
+    wireNoticiasFilters(content);
   }
 
   function notaHtml(n) {
@@ -732,11 +930,30 @@
     }).join("");
   }
 
-  // ---------- Triagem (candidatos de varredura ampla — cópia estática, só leitura) ----------
+  // ---------- Triagem (candidatos de varredura ampla) ----------
   function candidatoCardHtml(it) {
     var label = it.tipo_pesquisa === "contexto"
       ? ("Contexto — " + (it.tema || "tema não especificado"))
       : ("Central — " + (it.categoria || "categoria não especificada"));
+    var errorHtml = it.__error
+      ? '<div class="candidato-status">' + escapeHtml(it.__error) + "</div>"
+      : "";
+    var actionsHtml, noteHtml;
+    if (currentUser) {
+      actionsHtml =
+        '<div class="candidato-actions">' +
+          '<button type="button" class="candidato-btn integrar" data-action="integrar" data-id="' + escapeHtml(it.__id) + '"' + (it.__busy ? " disabled" : "") + '>Integrar ao painel</button>' +
+          '<button type="button" class="candidato-btn descartar" data-action="descartar" data-id="' + escapeHtml(it.__id) + '"' + (it.__busy ? " disabled" : "") + '>Descartar</button>' +
+        "</div>";
+      noteHtml = "";
+    } else {
+      actionsHtml =
+        '<div class="candidato-actions">' +
+          '<button type="button" class="candidato-btn integrar" disabled>Integrar ao painel</button>' +
+          '<button type="button" class="candidato-btn descartar" disabled>Descartar</button>' +
+        "</div>";
+      noteHtml = '<div class="candidato-note">Faça login (acima) para integrar ou descartar itens direto por aqui.</div>';
+    }
     return (
       '<article class="card" style="--cat-color:var(--ink-soft);--cat-bg:var(--surface-2)">' +
         '<div class="card-top">' +
@@ -746,11 +963,9 @@
         "</div>" +
         '<h3><a href="' + escapeHtml(it.link) + '" target="_blank" rel="noopener">' + escapeHtml(it.manchete_original) + "</a></h3>" +
         '<p class="resumo">' + escapeHtml(it.resumo_pt) + "</p>" +
-        '<div class="candidato-actions">' +
-          '<button type="button" class="candidato-btn integrar" disabled>Integrar ao painel</button>' +
-          '<button type="button" class="candidato-btn descartar" disabled>Descartar</button>' +
-        "</div>" +
-        '<div class="candidato-note">Ação só disponível na versão viva do painel (o Artifact no Claude).</div>' +
+        actionsHtml +
+        noteHtml +
+        errorHtml +
       "</article>"
     );
   }
@@ -783,6 +998,76 @@
         renderTriagem();
       });
     });
+  }
+
+  function wireTriagemActions(el) {
+    Array.prototype.forEach.call(el.querySelectorAll("[data-action=\"integrar\"]"), function (btn) {
+      btn.addEventListener("click", function () { integrarCandidato(btn.getAttribute("data-id")); });
+    });
+    Array.prototype.forEach.call(el.querySelectorAll("[data-action=\"descartar\"]"), function (btn) {
+      btn.addEventListener("click", function () { descartarCandidato(btn.getAttribute("data-id")); });
+    });
+  }
+
+  async function integrarCandidato(id) {
+    var it = candidatos.find(function (c) { return c.__id === id; });
+    if (!it || it.__busy) return;
+    if (!window.FB || !currentUser) { it.__error = "Faça login para integrar itens."; renderTriagem(); return; }
+    it.__busy = true;
+    it.__error = null;
+    renderTriagem();
+    try {
+      var payload = {
+        cidade: it.cidade,
+        data: it.data,
+        veiculo: it.veiculo,
+        link: it.link,
+        manchete_original: it.manchete_original,
+        resumo_pt: it.resumo_pt,
+        atores: it.atores || [],
+        coletado_em: it.coletado_em || it.data
+      };
+      if (it.tipo_pesquisa === "contexto") {
+        payload.tema = it.tema || "";
+        await window.FB.setDoc(window.FB.doc(window.FB.db, "contexto_itens", id), payload);
+        contextoItens.push(payload);
+      } else {
+        payload.categoria = it.categoria;
+        payload.flag_framework = it.flag_framework || "nenhuma";
+        await window.FB.setDoc(window.FB.doc(window.FB.db, "items", id), payload);
+        allItems.push(payload);
+      }
+      await window.FB.deleteDoc(window.FB.doc(window.FB.db, "candidatos", id));
+      candidatos = candidatos.filter(function (c) { return c.__id !== id; });
+      renderTriagem();
+      renderStats();
+      renderCities();
+      renderNuvem();
+      renderAtores();
+      renderContexto();
+    } catch (e) {
+      it.__busy = false;
+      it.__error = "Não foi possível integrar agora (" + (e && e.code ? e.code : "erro") + "). Tente de novo em instantes.";
+      renderTriagem();
+    }
+  }
+
+  async function descartarCandidato(id) {
+    var it = candidatos.find(function (c) { return c.__id === id; });
+    if (!it || it.__busy) return;
+    if (!window.FB || !currentUser) { it.__error = "Faça login para descartar itens."; renderTriagem(); return; }
+    it.__busy = true;
+    it.__error = null;
+    renderTriagem();
+    try {
+      await window.FB.deleteDoc(window.FB.doc(window.FB.db, "candidatos", id));
+      candidatos = candidatos.filter(function (c) { return c.__id !== id; });
+      renderTriagem();
+    } catch (e) {
+      it.__busy = false;
+      it.__error = "Não foi possível descartar agora (" + (e && e.code ? e.code : "erro") + "). Tente de novo em instantes.";
+      renderTriagem();
+    }
   }
 
   function renderTriagem() {
@@ -819,6 +1104,7 @@
     }
     el.innerHTML = filtersHtml + summary + bodyHtml;
     wireTriagemFilters(el);
+    wireTriagemActions(el);
   }
 
   // ---------- Filtro de conjunto (Nuvem / Atores) ----------
@@ -924,6 +1210,109 @@
     wireDatasetToggle(el, function (v) { atoresDataset = v; }, renderAtores);
   }
 
+  // ---------- Login (protege apenas a escrita; leitura do painel é sempre pública) ----------
+  function waitForFirebase(timeoutMs) {
+    return new Promise(function (resolve) {
+      if (window.FB) return resolve(window.FB);
+      var done = false;
+      function onReady() {
+        if (done) return;
+        done = true;
+        window.removeEventListener("firebase-ready", onReady);
+        resolve(window.FB);
+      }
+      window.addEventListener("firebase-ready", onReady);
+      setTimeout(function () {
+        if (done) return;
+        done = true;
+        window.removeEventListener("firebase-ready", onReady);
+        resolve(window.FB || null);
+      }, timeoutMs || 4000);
+    });
+  }
+
+  function renderAuthBox() {
+    var el = document.getElementById("auth-box");
+    if (!window.FB) { el.innerHTML = ""; return; }
+    if (currentUser) {
+      el.innerHTML =
+        '<span>Logado como ' + escapeHtml(currentUser.email) + ' · </span>' +
+        '<button type="button" class="auth-link" id="auth-signout">Sair</button>';
+      var out = document.getElementById("auth-signout");
+      if (out) out.addEventListener("click", function () { window.FB.signOut(); });
+    } else if (el.dataset.formOpen === "1") {
+      el.innerHTML =
+        '<form class="auth-form" id="auth-form">' +
+          '<input type="email" id="auth-email" placeholder="e-mail" autocomplete="username" required>' +
+          '<input type="password" id="auth-password" placeholder="senha" autocomplete="current-password" required>' +
+          '<button type="submit">Entrar</button>' +
+          '<button type="button" class="auth-link" id="auth-cancel">cancelar</button>' +
+        '</form>' +
+        '<div class="auth-error" id="auth-error"></div>';
+      wireAuthBox(el);
+    } else {
+      el.innerHTML = '<button type="button" class="auth-link" id="auth-open">Entrar</button>';
+      var openBtn = document.getElementById("auth-open");
+      if (openBtn) openBtn.addEventListener("click", function () { el.dataset.formOpen = "1"; renderAuthBox(); });
+    }
+  }
+
+  function wireAuthBox(el) {
+    var form = document.getElementById("auth-form");
+    var cancel = document.getElementById("auth-cancel");
+    if (cancel) cancel.addEventListener("click", function () { el.dataset.formOpen = "0"; renderAuthBox(); });
+    if (form) {
+      form.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var email = document.getElementById("auth-email").value;
+        var password = document.getElementById("auth-password").value;
+        var errEl = document.getElementById("auth-error");
+        errEl.textContent = "";
+        window.FB.signIn(email, password).catch(function (e) {
+          errEl.textContent = "Não foi possível entrar (confira e-mail e senha).";
+        });
+      });
+    }
+  }
+
+  // ---------- Carregamento de dados (Firestore, com fallback para data.json) ----------
+  async function loadFromFirestore(FB) {
+    async function getAllArray(name) {
+      var snap = await FB.getDocs(FB.collection(FB.db, name));
+      var out = [];
+      snap.forEach(function (d) {
+        var v = d.data();
+        v.__id = d.id;
+        out.push(v);
+      });
+      return out;
+    }
+    async function getAllMap(name) {
+      var snap = await FB.getDocs(FB.collection(FB.db, name));
+      var out = {};
+      snap.forEach(function (d) { out[d.id] = d.data(); });
+      return out;
+    }
+    var results = await Promise.all([
+      getAllArray("items"),
+      getAllArray("contexto_itens"),
+      getAllArray("candidatos"),
+      getAllMap("sintese"),
+      getAllMap("contexto_sintese"),
+      getAllArray("notas"),
+      getAllMap("meta")
+    ]);
+    return {
+      items: results[0],
+      contexto_itens: results[1],
+      candidatos: results[2],
+      sintese: results[3],
+      contexto_sintese: results[4],
+      notas: results[5],
+      meta: results[6].info || {}
+    };
+  }
+
   async function boot() {
     try {
       var saved = localStorage.getItem("radar-clima-tab");
@@ -934,15 +1323,23 @@
     renderFilters();
     applyTab();
 
+    var FB = await waitForFirebase(4000);
     var data = null;
-    try {
-      var res = await fetch("data.json", { cache: "no-store" });
-      data = await res.json();
-    } catch (e) { data = null; }
+
+    if (FB) {
+      try { data = await loadFromFirestore(FB); } catch (e) { data = null; }
+    }
+
+    if (!data) {
+      try {
+        var res = await fetch("data.json", { cache: "no-store" });
+        data = await res.json();
+      } catch (e) { data = null; }
+    }
 
     if (!data) {
       ["content", "content-politico", "content-resumo", "content-contexto", "content-nuvem", "content-atores", "content-triagem"].forEach(function (id) {
-        document.getElementById(id).innerHTML = '<div class="db-error">Não foi possível carregar data.json. Verifique se o arquivo está ao lado deste index.html.</div>';
+        document.getElementById(id).innerHTML = '<div class="db-error">Não foi possível carregar os dados do painel (nem do Firestore, nem do data.json local).</div>';
       });
       document.getElementById("notas-list").innerHTML = "";
       return;
@@ -968,6 +1365,15 @@
     if (data.meta && data.meta.ultima_atualizacao) {
       document.getElementById("ultima-atualizacao").textContent = fmtDate(data.meta.ultima_atualizacao);
     }
+
+    if (FB) {
+      FB.onAuthStateChanged(function (user) {
+        currentUser = user;
+        renderAuthBox();
+        renderTriagem();
+      });
+    }
+    renderAuthBox();
   }
 
   boot();
