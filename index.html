@@ -497,6 +497,100 @@
   .candidato-actions button:not(:disabled) { cursor: pointer; opacity: 1; }
   .candidato-btn:not(:disabled).integrar { opacity: 1; }
   .candidato-btn:not(:disabled).descartar { opacity: 1; }
+
+  /* Indicadores (sistema de codificacao C1-C4 / R1-R5c) */
+  .indicadores-notas { margin-bottom: 16px; }
+  .indicadores-notas summary { cursor: pointer; font-weight: 600; }
+  .indicadores-notas ul { margin: 8px 0 0; padding-left: 18px; }
+  .indicadores-notas li { margin-bottom: 6px; }
+  #indicadores-body h3 {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 1rem;
+    margin: 18px 0 8px;
+  }
+  .arg-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+  }
+  .arg-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .arg-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .arg-card-head h4 { margin: 0; font-size: 0.92rem; }
+  .arg-toggle-btn {
+    font: inherit;
+    font-size: 0.74rem;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--ink-soft);
+    padding: 3px 9px;
+    border-radius: 999px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .arg-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+  .arg-badge {
+    font-size: 0.7rem;
+    color: var(--ink-soft);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 8px;
+  }
+  .arg-badge-pendente {
+    color: var(--ink);
+    background: var(--cat-informal-bg);
+    border-color: var(--cat-informal);
+  }
+  .arg-card p { font-size: 0.88rem; line-height: 1.5; margin: 0; }
+  .arg-manage {
+    margin-top: 10px;
+    border-top: 1px dashed var(--border);
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .arg-manage-block label {
+    display: block;
+    font-size: 0.76rem;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+  .arg-textarea {
+    width: 100%;
+    min-height: 110px;
+    font: inherit;
+    font-size: 0.78rem;
+    font-family: "Courier New", Courier, monospace;
+    background: var(--surface-2);
+    color: var(--ink);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    resize: vertical;
+    box-sizing: border-box;
+    margin-bottom: 6px;
+  }
+  .arg-status { font-size: 0.76rem; color: var(--ink-soft); margin-top: 4px; min-height: 1em; }
+  .trecho-import {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .trecho-import h3 { margin: 0 0 6px; font-size: 1rem; }
 </style>
 </head>
 <body>
@@ -543,6 +637,22 @@
     <div id="content-contexto"><div class="loading">Carregando…</div></div>
   </div>
 
+  <div class="tabpanel" id="panel-indicadores" role="tabpanel" hidden>
+    <p class="tab-intro">Sistema de indicadores do framework analítico (condições C1–C4, resultados R1–R5c) codificado a partir dos trechos de notícia já integrados ao painel. Fase atual: estrutura de dados e apoio à codificação — o painel não chama nenhuma IA automaticamente; a extração de trechos e a redação dos textos vivos dependem de rodar os prompts prontos abaixo numa conversa à parte e colar o resultado de volta aqui. Importar, salvar novas versões e excluir só ficam disponíveis para o pesquisador logado.</p>
+    <details class="tab-intro indicadores-notas">
+      <summary>Notas técnicas desta implementação</summary>
+      <ul>
+        <li><b>Granularidade:</b> os textos vivos (camadas A e B) são organizados por condição/resultado (C1–C4, R1–R4, R5a/R5b/R5c) — não por indicador individual (C1.1, C1.2…). Um trecho codificado com "C1.2" conta como evidência para a célula "C1".</li>
+        <li><b>Armazenamento:</b> cada trecho codificado vira um documento próprio na coleção <code>trechos_codificados</code>, em vez de ficar aninhado dentro da notícia — isso permite contar e listar evidências por código diretamente.</li>
+        <li><b>Sem gatilho automático:</b> não há tarefa agendada nem chamada de IA disparada pelo painel. A codificação de notícia (aba "Trechos & importação") e a atualização de cada célula de argumento ("Gerenciar" nas abas de camada A/B) são feitas colando manualmente a saída de um prompt rodado à parte.</li>
+        <li><b>Histórico de versões:</b> cada atualização de uma célula de argumento grava uma versão em subcoleção própria (<code>argumentos/{id}/versoes</code>) em vez de acumular texto num array dentro do documento principal.</li>
+        <li><b>C3.4, R5c e R6:</b> seguem como o documento de especificação os define — C3.4 e R5c ativos como códigos propostos (ainda não formalizados no framework), R6 tratado só como fila de revisão manual ("Revisão manual (R6)"), sem virar resultado codificado automaticamente.</li>
+        <li><b>Origem dos trechos já importados:</b> os primeiros ~50 trechos foram codificados manualmente por Claude a partir dos resumos (<code>resumo_pt</code>) já presentes no painel de notícias — não são citações literais das matérias originais, já que o painel não guarda o corpo integral dos textos. Trate a confiança marcada em cada trecho como reflexo dessa limitação.</li>
+      </ul>
+    </details>
+    <div id="content-indicadores"><div class="loading">Carregando…</div></div>
+  </div>
+
   <div class="tabpanel" id="panel-relatorios" role="tabpanel" hidden>
     <p class="tab-intro">Repositório de relatórios semanais de leitura transversal — análise político-contextual que liga os principais acontecimentos da semana e compara o que tem acontecido em Recife, Cidade do Cabo e Mumbai. Um relatório por semana, mais recente primeiro.</p>
     <div id="content-relatorios"><div class="loading">Carregando…</div></div>
@@ -559,7 +669,7 @@
   </section>
 
   <footer class="disclaimer">
-    Este painel é um radar de desk research para acompanhamento interno da pesquisa — não é uma fonte citável por si mesma. Itens incluídos apenas quando localizados com link real via busca; nenhum item é inventado para preencher categorias ou semanas. A aba "Painel de notícias" é o corpus geral e acumulativo — todo item integrado passa a aparecer ali, filtrável por cidade, tipo de pesquisa, período e categoria. A aba "Política climática institucional" é uma síntese focada só na dinâmica institucional do escopo central da pesquisa; a aba "Resumo" é uma análise crítica que cruza esse escopo central com o panorama mais amplo captado em "Contexto político-institucional", revisada a cada atualização. "Nuvem de palavras" e "Atores" são calculadas automaticamente a partir dos textos e das entidades marcadas em cada item, e podem ser filtradas entre o conjunto de notícias sobre clima/informalidade e o conjunto de contexto político-institucional. A aba "Contexto político-institucional" reúne notícias reais sobre temas quentes do debate público local que não se enquadram nas quatro categorias da pesquisa, mas ajudam a entender o cenário em que ela acontece. A aba "Triagem" reúne achados de varreduras amplas ainda não avaliados, com filtros por cidade e por tipo de pesquisa; só passam a integrar o corpus os itens marcados manualmente como "Integrar ao painel" (na versão viva do painel).
+    Este painel é um radar de desk research para acompanhamento interno da pesquisa — não é uma fonte citável por si mesma. Itens incluídos apenas quando localizados com link real via busca; nenhum item é inventado para preencher categorias ou semanas. A aba "Painel de notícias" é o corpus geral e acumulativo — todo item integrado passa a aparecer ali, filtrável por cidade, tipo de pesquisa, período e categoria. A aba "Política climática institucional" é uma síntese focada só na dinâmica institucional do escopo central da pesquisa; a aba "Resumo" é uma análise crítica que cruza esse escopo central com o panorama mais amplo captado em "Contexto político-institucional", revisada a cada atualização. "Nuvem de palavras" e "Atores" são calculadas automaticamente a partir dos textos e das entidades marcadas em cada item, e podem ser filtradas entre o conjunto de notícias sobre clima/informalidade e o conjunto de contexto político-institucional. A aba "Contexto político-institucional" reúne notícias reais sobre temas quentes do debate público local que não se enquadram nas quatro categorias da pesquisa, mas ajudam a entender o cenário em que ela acontece. A aba "Triagem" reúne achados de varreduras amplas ainda não avaliados, com filtros por cidade e por tipo de pesquisa; só passam a integrar o corpus os itens marcados manualmente como "Integrar ao painel" (na versão viva do painel). A aba "Indicadores" organiza a codificação do framework analítico (condições C1–C4, resultados R1–R5c) a partir dos trechos de notícia; a codificação e a atualização dos textos vivos são feitas colando manualmente a saída de prompts prontos — não há chamada automática de IA embutida no painel, e importar, salvar ou excluir exigem login.
   </footer>
 </div>
 
@@ -620,10 +730,32 @@
     { key: "noticias", label: "Painel de notícias" },
     { key: "politico", label: "Política climática institucional" },
     { key: "contexto", label: "Contexto político-institucional" },
+    { key: "indicadores", label: "Indicadores" },
     { key: "nuvem", label: "Nuvem de palavras" },
     { key: "atores", label: "Atores" },
     { key: "resumo", label: "Resumo" },
     { key: "relatorios", label: "Relatórios semanais" }
+  ];
+
+  var INDICADOR_GRUPOS = [
+    { key: "C1", label: "C1 — Configuração político-institucional" },
+    { key: "C2", label: "C2 — Recursos organizacionais acumulados" },
+    { key: "C3", label: "C3 — Natureza da inovação e ameaça narrativa" },
+    { key: "C4", label: "C4 — Intermediação e tradução" },
+    { key: "R1", label: "R1 — Incorporação qualificada" },
+    { key: "R2", label: "R2 — Reconhecimento sem efeito material" },
+    { key: "R3", label: "R3 — Incorporação informal cotidiana" },
+    { key: "R4", label: "R4 — Indiferença estrutural" },
+    { key: "R5a", label: "R5a — Fechamento ativo (ameaça narrativa)" },
+    { key: "R5b", label: "R5b — Fechamento ativo (cooptação)" },
+    { key: "R5c", label: "R5c — Fechamento ativo (proteção ambiental)" }
+  ];
+
+  var INDICADORES_SECOES = [
+    { key: "camadaA", label: "Argumentos por cidade" },
+    { key: "camadaB", label: "Comparação entre cidades" },
+    { key: "trechos", label: "Trechos & importação" },
+    { key: "r6", label: "Revisão manual (R6)" }
   ];
 
   var STOPWORDS = {};
@@ -667,6 +799,11 @@
   var currentUser = null;
   var candidatos = [];
   var relatorios = [];
+  var trechosCodificados = [];
+  var argumentos = {};
+  var revisaoManual = [];
+  var indicadoresSecao = "camadaA";
+  var expandedArgCells = {};
 
   function catInfo(key) {
     for (var i = 0; i < CATS.length; i++) if (CATS[i].key === key) return CATS[i];
@@ -684,6 +821,39 @@
     var p = String(iso).split("-");
     if (p.length !== 3) return iso;
     return p[2] + "/" + p[1] + "/" + p[0];
+  }
+
+  function cidadeLabel(key) {
+    for (var i = 0; i < CITIES.length; i++) if (CITIES[i].key === key) return CITIES[i].label;
+    return key || "—";
+  }
+
+  function grupoLabel(codigo) {
+    for (var i = 0; i < INDICADOR_GRUPOS.length; i++) if (INDICADOR_GRUPOS[i].key === codigo) return INDICADOR_GRUPOS[i].label;
+    return codigo;
+  }
+
+  // Reduz um codigo de indicador (ex.: "C1.2") ao codigo de grupo usado nas
+  // celulas de argumento (ex.: "C1"). R5a/R5b/R5c ja sao o nivel de grupo.
+  // R6 fica fora da camada de argumentos (so fila de revisao manual).
+  function grupoDoCodigo(code) {
+    if (!code) return null;
+    var c = String(code).trim();
+    var m5 = c.match(/^R5([abc])$/i);
+    if (m5) return "R5" + m5[1].toLowerCase();
+    if (/^R6$/i.test(c)) return null;
+    var m = c.match(/^(C[1-4]|R[1-4])(\.\d+)?$/i);
+    if (m) return m[1].toUpperCase();
+    return null;
+  }
+
+  function normalizeCidade(raw) {
+    if (!raw) return null;
+    var v = String(raw).trim().toLowerCase();
+    if (v === "recife") return "recife";
+    if (v === "cape town" || v === "cidade do cabo" || v === "capetown" || v === "cidade-do-cabo") return "cidade-do-cabo";
+    if (v === "mumbai") return "mumbai";
+    return null;
   }
 
   function renderTabs() {
@@ -1245,6 +1415,494 @@
     wireDatasetToggle(el, function (v) { atoresDataset = v; }, renderAtores);
   }
 
+  // ---------- Indicadores (sistema de codificação C1-C4 / R1-R5c) ----------
+  function trechosPorGrupo(codigo, cidade) {
+    return trechosCodificados.filter(function (t) {
+      if (cidade && t.cidade !== cidade) return false;
+      return (t.codigos_grupo || []).indexOf(codigo) !== -1;
+    });
+  }
+
+  function trechosPendentes(argId, codigo, cidade) {
+    var arg = argumentos[argId];
+    var incorporados = (arg && arg.evidencias_incorporadas) || [];
+    return trechosPorGrupo(codigo, cidade).filter(function (t) { return incorporados.indexOf(t.__id) === -1; });
+  }
+
+  function cidadesPendentesTransversal(codigo, argTransversal) {
+    var transvAtualizado = argTransversal && argTransversal.atualizado_em;
+    return CITIES.filter(function (c) {
+      var cid = argumentos[c.key + "_" + codigo];
+      if (!cid || !cid.texto_atual) return false;
+      if (!transvAtualizado) return true;
+      return (cid.atualizado_em || "") > transvAtualizado;
+    }).map(function (c) { return c.label; });
+  }
+
+  function montarPromptCidade(cidade, codigo, arg, pendentes) {
+    var textoAtual = (arg && arg.texto_atual) ? arg.texto_atual : "(vazio — esta é a primeira atualização)";
+    var trechosTexto = pendentes.length
+      ? pendentes.map(function (t, i) {
+          return (i + 1) + '. "' + t.trecho + '" — notícia ' + (t.noticia_id || "não informado") + ", " + fmtDate(t.data) + ", " + t.veiculo + ", confiança: " + (t.confianca || "não informada") + " [id: " + t.__id + "]";
+        }).join("\n")
+      : "(nenhum trecho novo pendente — todos os trechos coletados até agora já foram incorporados)";
+    var contagem = (arg && arg.contagem_evidencias) || 0;
+    return [
+      "Você é um assistente de síntese analítica para uma pesquisa de doutorado sobre governança",
+      "climática urbana e informalidade no Sul Global. Sua tarefa é atualizar um texto de análise",
+      "acumulada sobre como uma condição ou resultado do framework analítico se manifesta em uma",
+      "cidade específica, a partir de novos trechos de notícia codificados.",
+      "",
+      "Você NÃO deve verificar se fontes diferentes se contradizem factualmente entre si — essa",
+      "checagem de convergência/contradição entre fontes é feita em outro relatório e está fora do",
+      "seu escopo aqui. Seu trabalho é framework: o que este novo trecho revela sobre como " + codigo + " (" + grupoLabel(codigo) + ")",
+      "opera em " + cidadeLabel(cidade) + ".",
+      "",
+      "TEXTO ATUAL (pode estar vazio, se esta for a primeira atualização):",
+      textoAtual,
+      "",
+      "TRECHOS NOVOS CODIFICADOS DESDE A ÚLTIMA ATUALIZAÇÃO:",
+      trechosTexto,
+      "(cada trecho vem com: citação literal, notícia de origem, data, veículo, confiança da",
+      "codificação, e um [id] — reaproveite esses ids em \"evidencias_incorporadas\" na resposta)",
+      "",
+      "TOTAL DE EVIDÊNCIAS JÁ ACUMULADAS NESTA CÉLULA: " + contagem,
+      "",
+      "REGRAS",
+      "- Revise e amplie o texto atual — não descarte o que já foi escrito. Incorpore o que os",
+      "  trechos novos confirmam, nuançam ou tensionam na leitura anterior.",
+      "- A complexidade e a precisão do texto devem ser proporcionais ao volume de evidência",
+      "  acumulada. Com poucos trechos (menos de 3), mantenha o texto curto e explicitamente",
+      "  tentativo. Não infle uma leitura robusta a partir de evidência escassa.",
+      "- Cite os trechos que sustentam cada afirmação.",
+      "- Trechos marcados com confiança baixa entram na análise, mas com peso menor, e devem ser",
+      "  nomeados como tal quando relevantes.",
+      "- Não faça checagem de contradição entre fontes — isso é escopo de outro relatório.",
+      "- Feche com uma frase separada (\"resumo_atualizacao\") descrevendo o que mudou nesta revisão",
+      "  em relação à versão anterior.",
+      "",
+      "FORMATO DE SAÍDA — JSON estrito:",
+      "{",
+      '  "texto_atualizado": "string",',
+      '  "resumo_atualizacao": "string",',
+      '  "evidencias_incorporadas": ["id_trecho_1", "id_trecho_2"]',
+      "}"
+    ].join("\n");
+  }
+
+  function montarPromptTransversal(codigo, arg) {
+    var textoAtual = (arg && arg.texto_atual) ? arg.texto_atual : "(vazio)";
+    var textoPorCidade = {};
+    CITIES.forEach(function (c) {
+      var cid = argumentos[c.key + "_" + codigo];
+      textoPorCidade[c.key] = (cid && cid.texto_atual) ? cid.texto_atual : "ainda sem evidência codificada";
+    });
+    return [
+      "Você é um assistente de síntese comparativa para uma pesquisa de doutorado sobre governança",
+      "climática urbana e informalidade no Sul Global. Sua tarefa é atualizar um texto comparativo",
+      "sobre como uma condição ou resultado do framework analítico se manifesta de forma",
+      "convergente ou distinta entre Recife, Cape Town e Mumbai.",
+      "",
+      "TEXTO TRANSVERSAL ATUAL (pode estar vazio):",
+      textoAtual,
+      "",
+      "TEXTOS DE CADA CIDADE PARA ESTE CÓDIGO (" + codigo + " — " + grupoLabel(codigo) + "):",
+      "Recife: " + textoPorCidade["recife"],
+      "Cape Town: " + textoPorCidade["cidade-do-cabo"],
+      "Mumbai: " + textoPorCidade["mumbai"],
+      "",
+      "REGRAS",
+      "- Revise e amplie o texto transversal atual — não descarte o que já foi escrito.",
+      "- Não é preciso esperar que as três cidades tenham evidência para gerar ou atualizar este",
+      "  texto. Nomeie explicitamente quando uma cidade ainda não tem evidência codificada para",
+      "  este código.",
+      "- O foco é comparação entre cidades neste código específico — convergência ou divergência",
+      "  de como " + codigo + " opera em cada contexto. Não é checagem de contradição entre fontes",
+      "  jornalísticas dentro de uma mesma cidade — isso é escopo de outro relatório.",
+      "- Trate este texto como uma versão viva do campo \"Variação entre os casos\" do documento de",
+      "  framework para esta condição/resultado.",
+      "- Feche com \"resumo_atualizacao\": o que mudou nesta revisão.",
+      "",
+      "FORMATO DE SAÍDA — JSON estrito:",
+      "{",
+      '  "texto_atualizado": "string",',
+      '  "resumo_atualizacao": "string"',
+      "}"
+    ].join("\n");
+  }
+
+  function argManageHtml(argId, codigo, cidade, arg, pendentesTrechos) {
+    var prompt = cidade ? montarPromptCidade(cidade, codigo, arg, pendentesTrechos) : montarPromptTransversal(codigo, arg);
+    var podeEditar = !!currentUser;
+    var saveBtn = podeEditar
+      ? '<button type="button" class="candidato-btn integrar" data-arg-save="' + escapeHtml(argId) + '" data-arg-codigo="' + escapeHtml(codigo) + '"' + (cidade ? ' data-arg-cidade="' + escapeHtml(cidade) + '"' : "") + ">Salvar nova versão</button>"
+      : '<p class="candidato-note">Faça login (acima) para salvar uma nova versão.</p>';
+    return (
+      '<div class="arg-manage">' +
+        '<div class="arg-manage-block">' +
+          '<label>1. Copie este prompt e rode numa conversa à parte (ex.: com o Claude):</label>' +
+          '<textarea class="arg-textarea" readonly data-arg-prompt="' + escapeHtml(argId) + '">' + escapeHtml(prompt) + "</textarea>" +
+          '<button type="button" class="candidato-btn descartar" data-arg-select="' + escapeHtml(argId) + '">Selecionar tudo</button>' +
+        "</div>" +
+        '<div class="arg-manage-block">' +
+          "<label>2. Cole aqui a resposta em JSON e salve como nova versão:</label>" +
+          '<textarea class="arg-textarea" data-arg-input="' + escapeHtml(argId) + '" placeholder=\'{"texto_atualizado": "...", "resumo_atualizacao": "..."' + (cidade ? ', "evidencias_incorporadas": [...]' : "") + "}'></textarea>" +
+          saveBtn +
+          '<div class="arg-status" data-arg-status="' + escapeHtml(argId) + '"></div>' +
+        "</div>" +
+      "</div>"
+    );
+  }
+
+  function argCardHtml(argId, codigo, cidade) {
+    var arg = argumentos[argId];
+    var texto = arg && arg.texto_atual ? arg.texto_atual : "";
+    var contagem = arg ? (arg.contagem_evidencias || 0) : 0;
+    var atualizado = arg && arg.atualizado_em ? fmtDate(arg.atualizado_em) : null;
+    var expanded = !!expandedArgCells[argId];
+
+    var pendentesTrechos = [], pendenteBadge = "";
+    if (cidade) {
+      pendentesTrechos = trechosPendentes(argId, codigo, cidade);
+      if (pendentesTrechos.length) pendenteBadge = '<span class="arg-badge arg-badge-pendente">' + pendentesTrechos.length + " trecho(s) pendente(s)</span>";
+    } else {
+      var pendentesCidades = cidadesPendentesTransversal(codigo, arg);
+      if (pendentesCidades.length) pendenteBadge = '<span class="arg-badge arg-badge-pendente">atualização pendente: ' + escapeHtml(pendentesCidades.join(", ")) + "</span>";
+    }
+
+    var body = texto
+      ? "<p>" + escapeHtml(texto) + "</p>"
+      : '<p class="empty-note">Ainda sem evidência codificada' + (cidade ? " para " + cidadeLabel(cidade) : "") + ".</p>";
+    var meta = '<div class="arg-meta">' +
+      (cidade ? '<span class="arg-badge">' + contagem + " evidência(s) incorporada(s)</span>" : "") +
+      pendenteBadge +
+      (atualizado ? '<span class="arg-badge">Atualizado em ' + atualizado + "</span>" : "") +
+      "</div>";
+    var manage = expanded ? argManageHtml(argId, codigo, cidade, arg, pendentesTrechos) : "";
+    return (
+      '<div class="arg-card">' +
+        '<div class="arg-card-head"><h4>' + escapeHtml(grupoLabel(codigo)) + "</h4>" +
+        '<button type="button" class="arg-toggle-btn" data-arg-toggle="' + escapeHtml(argId) + '">' + (expanded ? "Fechar" : "Gerenciar") + "</button></div>" +
+        meta + body + manage +
+      "</div>"
+    );
+  }
+
+  function wireArgActions(el) {
+    Array.prototype.forEach.call(el.querySelectorAll("[data-arg-toggle]"), function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-arg-toggle");
+        expandedArgCells[id] = !expandedArgCells[id];
+        renderIndicadoresBody();
+      });
+    });
+    Array.prototype.forEach.call(el.querySelectorAll("[data-arg-select]"), function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-arg-select");
+        var ta = el.querySelector('[data-arg-prompt="' + id + '"]');
+        if (ta) { ta.focus(); ta.select(); }
+      });
+    });
+    Array.prototype.forEach.call(el.querySelectorAll("[data-arg-save]"), function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-arg-save");
+        var codigo = btn.getAttribute("data-arg-codigo");
+        var cidade = btn.getAttribute("data-arg-cidade") || null;
+        salvarNovaVersaoArgumento(id, codigo, cidade);
+      });
+    });
+  }
+
+  async function salvarNovaVersaoArgumento(argId, codigo, cidade) {
+    var ta = document.querySelector('[data-arg-input="' + argId + '"]');
+    var statusEl = document.querySelector('[data-arg-status="' + argId + '"]');
+    if (!ta) return;
+    if (!window.FB || !currentUser) { if (statusEl) statusEl.textContent = "Faça login para salvar."; return; }
+    var raw = ta.value.trim();
+    if (!raw) { if (statusEl) statusEl.textContent = "Cole a resposta em JSON antes de salvar."; return; }
+    var parsed;
+    try { parsed = JSON.parse(raw); } catch (e) { if (statusEl) statusEl.textContent = "JSON inválido: " + e.message; return; }
+    if (!parsed || !parsed.texto_atualizado) { if (statusEl) statusEl.textContent = 'Faltou o campo "texto_atualizado".'; return; }
+    if (statusEl) statusEl.textContent = "Salvando…";
+    try {
+      var arg = argumentos[argId] || {};
+      var hoje = new Date().toISOString().slice(0, 10);
+      var payload = {
+        tipo: cidade ? "cidade" : "transversal",
+        cidade: cidade || null,
+        codigo: codigo,
+        texto_atual: parsed.texto_atualizado,
+        resumo_atualizacao: parsed.resumo_atualizacao || "",
+        atualizado_em: hoje,
+        versoes_count: (arg.versoes_count || 0) + 1
+      };
+      var evidenciasNovas = [];
+      if (cidade) {
+        var novas = Array.isArray(parsed.evidencias_incorporadas) ? parsed.evidencias_incorporadas : [];
+        var anteriores = arg.evidencias_incorporadas || [];
+        evidenciasNovas = novas.filter(function (id) { return anteriores.indexOf(id) === -1; });
+        payload.evidencias_incorporadas = anteriores.concat(evidenciasNovas);
+        payload.contagem_evidencias = payload.evidencias_incorporadas.length;
+      }
+      await window.FB.setDoc(window.FB.doc(window.FB.db, "argumentos", argId), payload);
+      var versoesCol = window.FB.collection(window.FB.doc(window.FB.db, "argumentos", argId), "versoes");
+      await window.FB.setDoc(window.FB.doc(versoesCol), {
+        versao: payload.versoes_count,
+        texto: parsed.texto_atualizado,
+        data: hoje,
+        evidencias_novas_nesta_versao: evidenciasNovas
+      });
+      argumentos[argId] = payload;
+      expandedArgCells[argId] = false;
+      renderIndicadoresBody();
+    } catch (e) {
+      if (statusEl) statusEl.textContent = "Não foi possível salvar agora (" + (e && e.code ? e.code : "erro") + "). Tente de novo.";
+    }
+  }
+
+  function renderCamadaA() {
+    var el = document.getElementById("indicadores-body");
+    el.innerHTML = CITIES.map(function (city) {
+      var cardsHtml = INDICADOR_GRUPOS.map(function (g) {
+        return argCardHtml(city.key + "_" + g.key, g.key, city.key);
+      }).join("");
+      return (
+        '<section class="city">' +
+          '<div class="city-head"><h2>' + city.label + "</h2></div>" +
+          '<div class="arg-grid">' + cardsHtml + "</div>" +
+        "</section>"
+      );
+    }).join("");
+    wireArgActions(el);
+  }
+
+  function renderCamadaB() {
+    var el = document.getElementById("indicadores-body");
+    var cardsHtml = INDICADOR_GRUPOS.map(function (g) {
+      return argCardHtml("transversal_" + g.key, g.key, null);
+    }).join("");
+    el.innerHTML = '<div class="arg-grid">' + cardsHtml + "</div>";
+    wireArgActions(el);
+  }
+
+  function trechoItemHtml(t) {
+    var excluirHtml = currentUser
+      ? '<div class="candidato-actions"><button type="button" class="candidato-btn descartar" data-trecho-excluir="' + escapeHtml(t.__id) + '">Excluir (erro de importação)</button></div>'
+      : "";
+    return (
+      '<article class="card trecho-item">' +
+        '<div class="card-top">' +
+          '<span class="cat-chip">' + escapeHtml((t.codigos || []).join(", ") || "sem código") + "</span>" +
+          '<span class="card-date">' + fmtDate(t.data) + "</span>" +
+          "<span>·</span><span>" + escapeHtml(cidadeLabel(t.cidade)) + "</span>" +
+          "<span>·</span><span>" + escapeHtml(t.veiculo || "") + "</span>" +
+        "</div>" +
+        '<p class="resumo">“' + escapeHtml(t.trecho) + '”</p>' +
+        '<div class="flag"><b>Registro:</b> ' + escapeHtml(t.registro || "—") +
+          " · <b>Direção da ameaça:</b> " + escapeHtml(t.direcao_ameaca || "—") +
+          " · <b>Confiança:</b> " + escapeHtml(t.confianca || "—") +
+        "</div>" +
+        excluirHtml +
+      "</article>"
+    );
+  }
+
+  function renderTrechosSecao() {
+    var el = document.getElementById("indicadores-body");
+    var recentes = trechosCodificados.slice().sort(function (a, b) { return (b.criado_em || "").localeCompare(a.criado_em || ""); }).slice(0, 60);
+    var listHtml = recentes.length ? recentes.map(trechoItemHtml).join("") : '<p class="empty-note">Nenhum trecho codificado ainda.</p>';
+    var importFormHtml = currentUser
+      ? ('<textarea class="arg-textarea" id="trecho-import-input" placeholder=\'{"noticia_id": "...", "cidade": "Recife", "data": "AAAA-MM-DD", "veiculo": "...", "trechos_codificados": [...]}\'></textarea>' +
+         '<button type="button" class="candidato-btn integrar" id="trecho-import-btn">Importar</button>' +
+         '<div class="arg-status" id="trecho-import-status"></div>')
+      : '<p class="candidato-note">Faça login (acima) para importar codificações.</p>';
+    el.innerHTML =
+      '<div class="trecho-import">' +
+        "<h3>Importar codificação de notícia</h3>" +
+        '<p class="empty-note">Cole aqui a saída JSON do comando de codificação automática (rodado manualmente numa conversa à parte) para uma notícia — schema "Esquema JSON por notícia codificada" da especificação. Cada trecho do array vira um documento na coleção de trechos; itens de "flags_revisao_manual" viram entradas na fila de revisão manual (R6).</p>' +
+        importFormHtml +
+      "</div>" +
+      "<h3>Trechos codificados recentemente (até 60)</h3>" +
+      '<div class="cards">' + listHtml + "</div>";
+    var btn = document.getElementById("trecho-import-btn");
+    if (btn) btn.addEventListener("click", importarCodificacao);
+    Array.prototype.forEach.call(el.querySelectorAll("[data-trecho-excluir]"), function (b) {
+      b.addEventListener("click", function () { excluirTrecho(b.getAttribute("data-trecho-excluir")); });
+    });
+  }
+
+  async function importarCodificacao() {
+    var ta = document.getElementById("trecho-import-input");
+    var statusEl = document.getElementById("trecho-import-status");
+    if (!ta) return;
+    if (!window.FB || !currentUser) { if (statusEl) statusEl.textContent = "Faça login para importar."; return; }
+    var raw = ta.value.trim();
+    if (!raw) { statusEl.textContent = "Cole o JSON antes de importar."; return; }
+    var parsed;
+    try { parsed = JSON.parse(raw); } catch (e) { statusEl.textContent = "JSON inválido: " + e.message; return; }
+    if (!parsed || !Array.isArray(parsed.trechos_codificados) || !parsed.trechos_codificados.length) {
+      statusEl.textContent = 'JSON precisa ter um array "trechos_codificados" com ao menos um item.';
+      return;
+    }
+    var cidade = normalizeCidade(parsed.cidade);
+    if (!cidade) { statusEl.textContent = 'Cidade não reconhecida: "' + parsed.cidade + '". Use Recife, Cape Town (ou Cidade do Cabo) ou Mumbai.'; return; }
+    statusEl.textContent = "Importando…";
+    try {
+      var hoje = new Date().toISOString().slice(0, 10);
+      var criados = [];
+      var trechosCol = window.FB.collection(window.FB.db, "trechos_codificados");
+      for (var i = 0; i < parsed.trechos_codificados.length; i++) {
+        var tc = parsed.trechos_codificados[i] || {};
+        var codigos = Array.isArray(tc.codigos) ? tc.codigos : [];
+        var codigosGrupo = [];
+        codigos.forEach(function (c) {
+          var g = grupoDoCodigo(c);
+          if (g && codigosGrupo.indexOf(g) === -1) codigosGrupo.push(g);
+        });
+        var payload = {
+          noticia_id: parsed.noticia_id || "",
+          cidade: cidade,
+          data: parsed.data || "",
+          veiculo: parsed.veiculo || "",
+          trecho: tc.trecho || "",
+          codigos: codigos,
+          codigos_grupo: codigosGrupo,
+          direcao_ameaca: tc.direcao_ameaca || "",
+          registro: tc.registro || "",
+          tipo_fonte: tc.tipo_fonte || "",
+          confianca: tc.confianca || "",
+          posicionalidade: tc.posicionalidade || "",
+          criado_em: hoje
+        };
+        var ref = window.FB.doc(trechosCol);
+        await window.FB.setDoc(ref, payload);
+        payload.__id = ref.id;
+        criados.push(payload);
+      }
+      trechosCodificados = trechosCodificados.concat(criados);
+
+      if (Array.isArray(parsed.flags_revisao_manual)) {
+        var revCol = window.FB.collection(window.FB.db, "revisao_manual");
+        for (var j = 0; j < parsed.flags_revisao_manual.length; j++) {
+          var revPayload = {
+            noticia_id: parsed.noticia_id || "",
+            cidade: cidade,
+            data: parsed.data || "",
+            veiculo: parsed.veiculo || "",
+            motivo: String(parsed.flags_revisao_manual[j]),
+            resumo_analitico: parsed.resumo_analitico || "",
+            criado_em: hoje,
+            status: "pendente"
+          };
+          var revRef = window.FB.doc(revCol);
+          await window.FB.setDoc(revRef, revPayload);
+          revPayload.__id = revRef.id;
+          revisaoManual.push(revPayload);
+        }
+      }
+
+      ta.value = "";
+      statusEl.textContent = criados.length + " trecho(s) importado(s) com sucesso.";
+      renderIndicadoresBody();
+    } catch (e) {
+      statusEl.textContent = "Não foi possível importar agora (" + (e && e.code ? e.code : "erro") + "). Tente de novo.";
+    }
+  }
+
+  async function excluirTrecho(id) {
+    if (!window.FB || !currentUser) return;
+    try {
+      await window.FB.deleteDoc(window.FB.doc(window.FB.db, "trechos_codificados", id));
+      trechosCodificados = trechosCodificados.filter(function (t) { return t.__id !== id; });
+      renderTrechosSecao();
+    } catch (e) {
+      var el = document.getElementById("indicadores-body");
+      if (el) {
+        var msgEl = document.createElement("p");
+        msgEl.className = "arg-status";
+        msgEl.textContent = "Não foi possível excluir agora. Tente novamente em instantes.";
+        el.insertBefore(msgEl, el.firstChild);
+      }
+    }
+  }
+
+  function r6ItemHtml(r) {
+    var resolverHtml = currentUser
+      ? '<div class="candidato-actions"><button type="button" class="candidato-btn integrar" data-r6-resolver="' + escapeHtml(r.__id) + '">Marcar como revisado</button></div>'
+      : '<p class="candidato-note">Faça login (acima) para marcar como revisado.</p>';
+    return (
+      '<article class="card">' +
+        '<div class="card-top">' +
+          '<span class="cat-chip">Candidato a R6</span>' +
+          '<span class="card-date">' + fmtDate(r.data) + "</span>" +
+          "<span>·</span><span>" + escapeHtml(cidadeLabel(r.cidade)) + "</span>" +
+          "<span>·</span><span>" + escapeHtml(r.veiculo || "") + "</span>" +
+        "</div>" +
+        '<p class="resumo">' + escapeHtml(r.motivo) + "</p>" +
+        (r.resumo_analitico ? '<p class="resumo">' + escapeHtml(r.resumo_analitico) + "</p>" : "") +
+        resolverHtml +
+      "</article>"
+    );
+  }
+
+  function renderR6Secao() {
+    var el = document.getElementById("indicadores-body");
+    var pendentes = revisaoManual.filter(function (r) { return r.status !== "resolvido"; });
+    if (!pendentes.length) {
+      el.innerHTML = '<p class="empty-note">Nenhum item aguardando revisão manual no momento.</p>';
+      return;
+    }
+    el.innerHTML = '<div class="cards">' + pendentes.map(r6ItemHtml).join("") + "</div>";
+    Array.prototype.forEach.call(el.querySelectorAll("[data-r6-resolver]"), function (btn) {
+      btn.addEventListener("click", function () { resolverR6(btn.getAttribute("data-r6-resolver")); });
+    });
+  }
+
+  async function resolverR6(id) {
+    if (!window.FB || !currentUser) return;
+    try {
+      var r = revisaoManual.find(function (x) { return x.__id === id; });
+      if (!r) return;
+      var copy = {};
+      for (var k in r) if (Object.prototype.hasOwnProperty.call(r, k)) copy[k] = r[k];
+      copy.status = "resolvido";
+      delete copy.__id;
+      await window.FB.setDoc(window.FB.doc(window.FB.db, "revisao_manual", id), copy);
+      revisaoManual = revisaoManual.map(function (x) { return x.__id === id ? Object.assign({}, x, { status: "resolvido" }) : x; });
+      renderR6Secao();
+    } catch (e) {}
+  }
+
+  function renderIndicadoresSubnav() {
+    var el = document.getElementById("indicadores-subnav");
+    el.innerHTML = INDICADORES_SECOES.map(function (s) {
+      return '<button type="button" class="filter-btn dataset-btn" data-indicadores-secao="' + s.key + '" aria-pressed="' + (s.key === indicadoresSecao) + '">' + escapeHtml(s.label) + "</button>";
+    }).join("");
+    Array.prototype.forEach.call(el.querySelectorAll("[data-indicadores-secao]"), function (btn) {
+      btn.addEventListener("click", function () {
+        indicadoresSecao = btn.getAttribute("data-indicadores-secao");
+        renderIndicadoresSubnav();
+        renderIndicadoresBody();
+      });
+    });
+  }
+
+  function renderIndicadoresBody() {
+    if (indicadoresSecao === "camadaA") renderCamadaA();
+    else if (indicadoresSecao === "camadaB") renderCamadaB();
+    else if (indicadoresSecao === "trechos") renderTrechosSecao();
+    else renderR6Secao();
+  }
+
+  function renderIndicadores() {
+    var el = document.getElementById("content-indicadores");
+    el.innerHTML =
+      '<div class="dataset-toggle" id="indicadores-subnav" role="group" aria-label="Seções de indicadores"></div>' +
+      '<div id="indicadores-body"></div>';
+    renderIndicadoresSubnav();
+    renderIndicadoresBody();
+  }
+
   // ---------- Login (protege apenas a escrita; leitura do painel é sempre pública) ----------
   function waitForFirebase(timeoutMs) {
     return new Promise(function (resolve) {
@@ -1336,7 +1994,10 @@
       getAllMap("contexto_sintese"),
       getAllArray("notas"),
       getAllMap("meta"),
-      getAllArray("relatorios_semanais")
+      getAllArray("relatorios_semanais"),
+      getAllArray("trechos_codificados"),
+      getAllMap("argumentos"),
+      getAllArray("revisao_manual")
     ]);
     return {
       items: results[0],
@@ -1346,7 +2007,10 @@
       contexto_sintese: results[4],
       notas: results[5],
       meta: results[6].info || {},
-      relatorios_semanais: results[7]
+      relatorios_semanais: results[7],
+      trechos_codificados: results[8],
+      argumentos: results[9],
+      revisao_manual: results[10]
     };
   }
 
@@ -1375,7 +2039,7 @@
     }
 
     if (!data) {
-      ["content", "content-politico", "content-resumo", "content-contexto", "content-nuvem", "content-atores", "content-triagem", "content-relatorios"].forEach(function (id) {
+      ["content", "content-politico", "content-resumo", "content-contexto", "content-nuvem", "content-atores", "content-triagem", "content-relatorios", "content-indicadores"].forEach(function (id) {
         document.getElementById(id).innerHTML = '<div class="db-error">Não foi possível carregar os dados do painel (nem do Firestore, nem do data.json local).</div>';
       });
       document.getElementById("notas-list").innerHTML = "";
@@ -1389,6 +2053,9 @@
     contextoSintese = data.contexto_sintese || {};
     candidatos = data.candidatos || [];
     relatorios = data.relatorios_semanais || [];
+    trechosCodificados = data.trechos_codificados || [];
+    argumentos = data.argumentos || {};
+    revisaoManual = data.revisao_manual || [];
 
     renderStats();
     renderCities();
@@ -1400,6 +2067,7 @@
     renderContexto();
     renderTriagem();
     renderRelatorios();
+    renderIndicadores();
 
     if (data.meta && data.meta.ultima_atualizacao) {
       document.getElementById("ultima-atualizacao").textContent = fmtDate(data.meta.ultima_atualizacao);
@@ -1410,6 +2078,7 @@
         currentUser = user;
         renderAuthBox();
         renderTriagem();
+        renderIndicadoresBody();
       });
     }
     renderAuthBox();
