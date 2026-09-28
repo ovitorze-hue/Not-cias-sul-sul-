@@ -1,0 +1,13 @@
+{
+  "name": "noticias-sul-sul-sync",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Script de sincronização do Firestore (radar-clima-sul-sul) a partir do export do banco do Artifact (claude.ai).",
+  "scripts": {
+    "sync-firestore": "node scripts/sync-firestore.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.6.0"
+  }
+}
